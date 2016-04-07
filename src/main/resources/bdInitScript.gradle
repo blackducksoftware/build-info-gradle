@@ -1,0 +1,23 @@
+initscript {
+	dependencies { classpath fileTree('${pluginLibDir}') }
+}
+
+import org.gradle.BuildAdapter
+import org.gradle.api.invocation.Gradle
+
+import com.blackducksoftware.integration.gradle.BDGradlePlugin
+
+addListener(new BuildInfoPluginListener())
+
+class BuildInfoPluginListener extends BuildAdapter {
+	def void projectsLoaded(Gradle gradle) {
+		gradle.startParameter.getProjectProperties().put("build.start", Long.toString(System.currentTimeMillis()))
+		Project root = gradle.getRootProject()
+		root.logger.debug("Gradle Build Info Plugin")
+		if (!"buildSrc".equals(root.name)) {
+			root.allprojects {
+				apply { apply plugin: BDGradlePlugin }
+			}
+		}
+	}
+}
