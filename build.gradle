@@ -32,3 +32,9 @@ sourceSets {
 		resources { srcDir 'src/main/resources' }
 	}
 }
+
+task copyRuntimeLibs(type: Copy) {
+	into "${buildDir}/libs"
+	from configurations.testRuntime
+}
+assemble.dependsOn copyRuntimeLibs
