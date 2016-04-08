@@ -9,6 +9,7 @@ allprojects {
 
 repositories {
 	mavenLocal()
+	mavenCentral()
 	maven { url "https://updates.suite.blackducksoftware.com/bdosvr/" }
 	maven { url "http://dl.bintray.com/bds/integration/" }
 }
