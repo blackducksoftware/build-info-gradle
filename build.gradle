@@ -33,6 +33,16 @@ sourceSets {
 	}
 }
 
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			repository(url: 'https://updates.suite.blackducksoftware.com/bdosvr/') {
+				authentication(userName: System.properties['artifactoryUser'], password: System.properties['artifactoryPassword'])
+			}
+		}
+	}
+}
+
 task copyRuntimeLibs(type: Copy) {
 	into "${buildDir}/libs"
 	from configurations.testRuntime
