@@ -32,3 +32,13 @@ sourceSets {
 		resources { srcDir 'src/main/resources' }
 	}
 }
+
+uploadArchives{
+	repositories{
+		mavenDeployer{
+			repository(url: 'https://updates.suite.blackducksoftware.com/bdosvr/'){
+				authentication(userName: System.properties['artifactoryUser'], password: System.properties['artifactoryPassword'])
+			}
+		}
+	}
+}
