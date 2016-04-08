@@ -45,6 +45,6 @@ uploadArchives {
 
 task copyRuntimeLibs(type: Copy) {
 	into "${buildDir}/libs"
-	from configurations.compile
+	from configurations.runtime
 }
 assemble.dependsOn copyRuntimeLibs
