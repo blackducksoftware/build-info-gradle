@@ -3,9 +3,11 @@ initscript {
 }
 
 import org.gradle.BuildAdapter
+import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
 import com.blackducksoftware.integration.gradle.BDGradlePlugin
+
 
 addListener(new BuildInfoPluginListener())
 
