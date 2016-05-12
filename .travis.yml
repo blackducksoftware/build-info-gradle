@@ -1,6 +1,12 @@
 language: java
+before_cache:
+  # removing the lock file seems to be necessary so that travis
+  # won't create a new cache every build
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
 notifications:
@@ -13,6 +19,6 @@ notifications:
 
 install: true
 script:
-  - ./gradlew assemble
+  - ./gradlew clean assemble
 after_success:
-  - ./gradlew jacocoTestReport coveralls
+  - ./gradlew test jacocoTestReport coveralls

@@ -1,14 +1,9 @@
 plugins {
+  id 'groovy'
+	id 'maven'
+	id 'eclipse'
 	id 'com.github.kt3k.coveralls' version '2.6.3'
-}
-
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-apply plugin: 'jacoco'
-
-jacoco {
-	toolVersion = "0.7.6.201602180812"
+	id 'jacoco'
 }
 
 compileJava.options.encoding = 'UTF-8'
@@ -32,11 +27,6 @@ dependencies {
 	compile group: "com.google.code.gson", name: "gson", version: "2.2.4"
 }
 
-compileJava.doFirst {
-	println "source compatibility " + sourceCompatibility
-	println "target compatibility " + targetCompatibility
-}
-
 sourceSets {
 	main {
 		java { srcDir 'src/main/java' }
@@ -51,6 +41,16 @@ uploadArchives {
 				authentication(userName: System.properties['artifactoryUser'], password: System.properties['artifactoryPassword'])
 			}
 		}
+	}
+}
+
+jacoco {
+	toolVersion = "0.7.6.201602180812"
+}
+
+jacocoTestReport {
+  reports {
+	  xml.enabled = true
 	}
 }
 
