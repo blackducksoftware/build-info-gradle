@@ -23,14 +23,13 @@ import java.io.File;
 import org.gradle.api.Project;
 
 public class BDGradleUtil {
-
 	public static final String BUILD_ID_PROPERTY = "BuildId";
 
 	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
 
 	public static final String DEPENDENCY_REPORT_OUTPUT = "DepedencyReportOutput";
 
-	public static String getGAV(final String group, final String artifact, final String version) {
+	public String getGAV(final String group, final String artifact, final String version) {
 		final StringBuilder gavBuilder = new StringBuilder();
 		gavBuilder.append(group);
 		gavBuilder.append(":");
@@ -40,7 +39,7 @@ public class BDGradleUtil {
 		return gavBuilder.toString();
 	}
 
-	public static File findBuildDir(final Project project) {
+	public File findBuildDir(final Project project) {
 		File buildDir;
 
 		if (project.getRootProject() != null) {
@@ -49,6 +48,8 @@ public class BDGradleUtil {
 		} else {
 			buildDir = project.getBuildDir();
 		}
+
 		return buildDir;
 	}
+
 }

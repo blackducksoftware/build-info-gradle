@@ -27,6 +27,7 @@ import org.gradle.api.UnknownTaskException;
 import org.gradle.api.tasks.diagnostics.DependencyReportTask;
 
 public class BDGradlePlugin implements Plugin<Project> {
+	private final BDGradleUtil bdGradleUtil = new BDGradleUtil();
 
 	@Override
 	public void apply(final Project project) {
@@ -83,7 +84,7 @@ public class BDGradlePlugin implements Plugin<Project> {
 		final String dependencyTreeOutputRaw = System.getProperty(BDGradleUtil.DEPENDENCY_REPORT_OUTPUT);
 
 		if (dependencyTreeOutputRaw == null || dependencyTreeOutputRaw.trim().length() == 0) {
-			final File buildDir = BDGradleUtil.findBuildDir(project);
+			final File buildDir = bdGradleUtil.findBuildDir(project);
 
 			final File blackDuckDir = new File(buildDir, "BlackDuck/");
 			blackDuckDir.mkdirs();

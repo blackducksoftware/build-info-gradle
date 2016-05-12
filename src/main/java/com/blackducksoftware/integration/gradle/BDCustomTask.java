@@ -40,11 +40,10 @@ import org.gradle.api.tasks.TaskAction;
 import com.blackducksoftware.integration.build.BuildArtifact;
 import com.blackducksoftware.integration.build.BuildDependency;
 import com.blackducksoftware.integration.build.BuildInfo;
-import com.blackducksoftware.integration.build.BuildInfoDeSerializer;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class BDCustomTask extends DefaultTask {
+	private final BDGradleUtil bdGradleUtil = new BDGradleUtil();
 
 	private File blackDuckDir;
 
@@ -56,7 +55,7 @@ public class BDCustomTask extends DefaultTask {
 	public void gatherDeps() throws IOException {
 		final Project project = getProject();
 
-		final File buildDir = BDGradleUtil.findBuildDir(project);
+		final File buildDir = bdGradleUtil.findBuildDir(project);
 
 		blackDuckDir = new File(buildDir, "BlackDuck/");
 		blackDuckDir.mkdirs();
@@ -92,8 +91,7 @@ public class BDCustomTask extends DefaultTask {
 			final String buildInfoString = buildInfoStringBuilder.toString();
 			if (buildInfoString != null && buildInfoString.trim().length() > 0) {
 				// build-info.json is not an empty file
-				final Gson gson = new GsonBuilder().registerTypeAdapter(BuildInfo.class, new BuildInfoDeSerializer())
-						.create();
+				final Gson gson = new Gson();
 				// We use Gson to turn the json string into a BuildInfo object
 				oldBuildInfo = gson.fromJson(buildInfoString, BuildInfo.class);
 			}
@@ -118,14 +116,12 @@ public class BDCustomTask extends DefaultTask {
 			buildInfo.setBuildId(buildId);
 
 			final BuildArtifact buildArtifact = new BuildArtifact();
-			buildArtifact.setType(BuildInfo.GRADLE_TYPE);
+			buildArtifact.setType("org.gradle");
 			buildArtifact.setGroup(project.getGroup().toString());
 			buildArtifact.setArtifact(project.getName());
 			buildArtifact.setVersion(project.getVersion().toString());
-			buildArtifact.setId(BDGradleUtil.getGAV(String.valueOf(project.getGroup()), project.getName(),
-					String.valueOf(project.getVersion())));
 
-			buildInfo.setArtifact(buildArtifact);
+			buildInfo.setBuildArtifact(buildArtifact);
 		}
 
 		final Set<Configuration> configurations = project.getConfigurations();
@@ -135,8 +131,7 @@ public class BDCustomTask extends DefaultTask {
 		if (buildInfo.getDependencies() != null && !buildInfo.getDependencies().isEmpty()) {
 			for (final BuildDependency dependency : buildInfo.getDependencies()) {
 				// Adding previously discovered dependencies to the new map
-				final String externalId = BDGradleUtil.getGAV(dependency.getGroup(), dependency.getArtifact(),
-						dependency.getVersion());
+				final String externalId = dependency.getId();
 				resolvedDependenciesMap.put(externalId, dependency);
 			}
 			buildInfo.setDependencies(new HashSet<BuildDependency>());
@@ -163,7 +158,7 @@ public class BDCustomTask extends DefaultTask {
 		}
 		final Set<BuildDependency> dependencies = new HashSet<BuildDependency>();
 		dependencies.addAll(resolvedDependenciesMap.values());
-		buildInfo.addDependencies(dependencies);
+		buildInfo.setDependencies(dependencies);
 		buildInfo.close(blackDuckDir);
 	}
 
@@ -172,8 +167,8 @@ public class BDCustomTask extends DefaultTask {
 		final String externalId = group + ":" + artifact + ":" + version;
 		if (dependenciesMap.containsKey(externalId)) {
 			final BuildDependency existing = dependenciesMap.get(externalId);
-			if (!existing.getScope().contains(configuration)) {
-				existing.getScope().add(configuration);
+			if (!existing.getScopes().contains(configuration)) {
+				existing.getScopes().add(configuration);
 			}
 		} else {
 			if (configurationIncluded) {
@@ -182,9 +177,9 @@ public class BDCustomTask extends DefaultTask {
 				buildDependency.setArtifact(artifact);
 				buildDependency.setVersion(version);
 
-				final ArrayList<String> scopeList = new ArrayList<String>();
+				final Set<String> scopeList = new HashSet<String>();
 				scopeList.add(configuration);
-				buildDependency.setScope(scopeList);
+				buildDependency.setScopes(scopeList);
 				dependenciesMap.put(externalId, buildDependency);
 			}
 		}

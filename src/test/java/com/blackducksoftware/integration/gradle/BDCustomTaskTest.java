@@ -36,9 +36,7 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.build.BuildDependency;
 import com.blackducksoftware.integration.build.BuildInfo;
-import com.blackducksoftware.integration.build.BuildInfoDeSerializer;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class BDCustomTaskTest {
 	@After
@@ -89,13 +87,13 @@ public class BDCustomTaskTest {
 			assertTrue(buildInfoFile.exists());
 			System.out.println(buildInfoFile.getAbsolutePath());
 			final String buildInfoContent = FileUtils.readFileToString(buildInfoFile);
-			assertTrue(buildInfoContent.contains(BuildInfo.TYPE));
-			assertTrue(buildInfoContent.contains(BuildInfo.GRADLE_TYPE));
-			assertTrue(buildInfoContent.contains(BuildInfo.GROUP));
-			assertTrue(buildInfoContent.contains(BuildInfo.ARTIFACT));
-			assertTrue(buildInfoContent.contains(BuildInfo.VERSION));
-			assertTrue(buildInfoContent.contains(BuildInfo.ID));
-			assertTrue(buildInfoContent.contains(BuildInfo.DEPENDENCIES));
+			assertTrue(buildInfoContent.contains("type"));
+			assertTrue(buildInfoContent.contains("org.gradle"));
+			assertTrue(buildInfoContent.contains("group"));
+			assertTrue(buildInfoContent.contains("artifact"));
+			assertTrue(buildInfoContent.contains("version"));
+			assertTrue(buildInfoContent.contains("id"));
+			assertTrue(buildInfoContent.contains("dependencies"));
 		} finally {
 			cleanup(project.getBuildDir());
 		}
@@ -131,18 +129,17 @@ public class BDCustomTaskTest {
 			final File buildInfoFile = new File(buildDir, "BlackDuck/build-info.json");
 			assertTrue(buildInfoFile.exists());
 			final String buildInfoContent = FileUtils.readFileToString(buildInfoFile);
-			final Gson deSerializeGson = new GsonBuilder()
-					.registerTypeAdapter(BuildInfo.class, new BuildInfoDeSerializer()).create();
-			final BuildInfo buildInfo = deSerializeGson.fromJson(buildInfoContent, BuildInfo.class);
+			final Gson gson = new Gson();
+			final BuildInfo buildInfo = gson.fromJson(buildInfoContent, BuildInfo.class);
 			System.out.println(buildInfo);
 			assertEquals("TestBuildId", buildInfo.getBuildId());
-			assertEquals("org.gradle", buildInfo.getArtifact().getType());
+			assertEquals("org.gradle", buildInfo.getBuildArtifact().getType());
 			assertEquals(9, buildInfo.getDependencies().size());
 			final BuildDependency dependency = buildInfo.getDependencies().iterator().next();
 
-			assertTrue(dependency.getScope().contains("testingConfig"));
-			assertTrue(dependency.getScope().contains("testingConfig2"));
-			assertTrue(dependency.getScope().contains("testingConfig3"));
+			assertTrue(dependency.getScopes().contains("testingConfig"));
+			assertTrue(dependency.getScopes().contains("testingConfig2"));
+			assertTrue(dependency.getScopes().contains("testingConfig3"));
 		} finally {
 			cleanup(project.getBuildDir());
 		}
@@ -177,12 +174,11 @@ public class BDCustomTaskTest {
 			final File buildInfoFile = new File(buildDir, "BlackDuck/build-info.json");
 			assertTrue(buildInfoFile.exists());
 			final String buildInfoContent = FileUtils.readFileToString(buildInfoFile);
-			final Gson deSerializeGson = new GsonBuilder()
-					.registerTypeAdapter(BuildInfo.class, new BuildInfoDeSerializer()).create();
-			final BuildInfo buildInfo = deSerializeGson.fromJson(buildInfoContent, BuildInfo.class);
+			final Gson gson = new Gson();
+			final BuildInfo buildInfo = gson.fromJson(buildInfoContent, BuildInfo.class);
 			System.out.println(buildInfo);
 			assertEquals("TestBuildId", buildInfo.getBuildId());
-			assertEquals("org.gradle", buildInfo.getArtifact().getType());
+			assertEquals("org.gradle", buildInfo.getBuildArtifact().getType());
 			assertEquals(11, buildInfo.getDependencies().size());
 		} finally {
 			cleanup(project.getBuildDir());
