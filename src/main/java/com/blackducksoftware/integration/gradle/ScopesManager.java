@@ -36,7 +36,12 @@ public class ScopesManager {
 			return false;
 		}
 
-		return shouldIncludeScopeMap.get(scope.trim().toUpperCase());
+		final String scopeKey = scope.trim().toUpperCase();
+		if (shouldIncludeScopeMap.containsKey(scopeKey)) {
+			return shouldIncludeScopeMap.get(scopeKey);
+		} else {
+			return false;
+		}
 	}
 
 	private void populateAllAvailableScopes() {
