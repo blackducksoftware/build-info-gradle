@@ -26,8 +26,8 @@ import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
 import org.gradle.api.tasks.diagnostics.DependencyReportTask;
 
-public class BDGradlePlugin implements Plugin<Project> {
-	private final BDGradleUtil bdGradleUtil = new BDGradleUtil();
+public class BuildInfoGradlePlugin implements Plugin<Project> {
+	private final GradleUtil gradleUtil = new GradleUtil();
 
 	@Override
 	public void apply(final Project project) {
@@ -35,8 +35,8 @@ public class BDGradlePlugin implements Plugin<Project> {
 			return;
 		}
 
-		addBDBuildInfoTask(project);
-		System.out.println("Using Black Duck Plugin for " + project.getPath());
+		addBuildInfoCustomTask(project);
+		System.out.println("Using Black Duck Build Info Plugin for " + project.getPath());
 
 		final File output = getDependencyReportOutputFile(project);
 		if (output != null) {
@@ -45,7 +45,7 @@ public class BDGradlePlugin implements Plugin<Project> {
 			}
 		}
 
-		final DependencyReportTask dependencyReportTask = project.getTasks().create("bdDependencyTree",
+		final DependencyReportTask dependencyReportTask = project.getTasks().create("buildInfoDependencyTree",
 				DependencyReportTask.class);
 		dependencyReportTask.setOutputFile(output);
 
@@ -56,36 +56,36 @@ public class BDGradlePlugin implements Plugin<Project> {
 		}
 	}
 
-	public BDCustomTask addBDBuildInfoTask(final Project project) {
-		BDCustomTask buildInfo = null;
+	public BuildInfoCustomTask addBuildInfoCustomTask(final Project project) {
+		BuildInfoCustomTask buildInfoCustomTask = null;
 		try {
-			buildInfo = (BDCustomTask) project.getTasks().getByName("bdCustomTask");
+			buildInfoCustomTask = (BuildInfoCustomTask) project.getTasks().getByName("buildInfoCustomTask");
 		} catch (final UnknownTaskException e) {
 		}
 
-		if (buildInfo == null) {
+		if (buildInfoCustomTask == null) {
 			final boolean isRoot = project.equals(project.getRootProject());
 			System.out.println(
-					"Configuring bdCustomTask task for project : " + project.getPath() + ": is root? " + isRoot);
-			buildInfo = createBDBuildInfoTask(project);
-			buildInfo.setGroup("reporting");
+					"Configuring buildInfoCustomTask task for project : " + project.getPath() + ": is root? " + isRoot);
+			buildInfoCustomTask = createBuildInfoCustomTask(project);
+			buildInfoCustomTask.setGroup("reporting");
 		}
 
-		return buildInfo;
+		return buildInfoCustomTask;
 	}
 
-	private BDCustomTask createBDBuildInfoTask(final Project project) {
-		final BDCustomTask result = project.getTasks().create("bdCustomTask", BDCustomTask.class);
-		result.setDescription("'Generate build-info file, using project configurations.'");
-		return result;
+	private BuildInfoCustomTask createBuildInfoCustomTask(final Project project) {
+		final BuildInfoCustomTask buildInfoCustomTask = project.getTasks().create("buildInfoCustomTask",
+				BuildInfoCustomTask.class);
+		buildInfoCustomTask.setDescription("'Generate build-info file, using project configurations.'");
+		return buildInfoCustomTask;
 	}
 
 	private File getDependencyReportOutputFile(final Project project) {
-		final String dependencyTreeOutputRaw = System.getProperty(BDGradleUtil.DEPENDENCY_REPORT_OUTPUT);
+		final String dependencyTreeOutputRaw = System.getProperty(GradleUtil.DEPENDENCY_REPORT_OUTPUT);
 
 		if (dependencyTreeOutputRaw == null || dependencyTreeOutputRaw.trim().length() == 0) {
-			final File buildDir = bdGradleUtil.findBuildDir(project);
-
+			final File buildDir = gradleUtil.findBuildDir(project);
 			final File blackDuckDir = new File(buildDir, "BlackDuck/");
 			blackDuckDir.mkdirs();
 

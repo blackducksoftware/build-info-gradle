@@ -18,28 +18,36 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import java.io.File;
 
 import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.testfixtures.ProjectBuilder;
-import org.junit.Test;
 
-public class BDGradlePluginTest {
-	@Test
-	public void canApplyPluginToProject() {
-		final Project project = ProjectBuilder.builder().build();
-		assertFalse(project.getPlugins().hasPlugin(BDGradlePlugin.class));
+public class GradleUtil {
+	public static final String BUILD_ID_PROPERTY = "BuildId";
+	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
+	public static final String DEPENDENCY_REPORT_OUTPUT = "DepedencyReportOutput";
 
-		project.getPluginManager().apply(BDGradlePlugin.class);
+	public String getGAV(final String group, final String artifact, final String version) {
+		final StringBuilder gavBuilder = new StringBuilder();
+		gavBuilder.append(group);
+		gavBuilder.append(":");
+		gavBuilder.append(artifact);
+		gavBuilder.append(":");
+		gavBuilder.append(version);
+		return gavBuilder.toString();
+	}
 
-		assertTrue(project.getPlugins().hasPlugin(BDGradlePlugin.class));
+	public File findBuildDir(final Project project) {
+		File buildDir;
 
-		final Task task = project.getTasks().getByName("bdCustomTask");
-		assertNotNull(task);
-		assertTrue(task instanceof BDCustomTask);
+		if (project.getRootProject() != null) {
+			final Project rootProject = project.getRootProject();
+			buildDir = rootProject.getBuildDir();
+		} else {
+			buildDir = project.getBuildDir();
+		}
+
+		return buildDir;
 	}
 
 }

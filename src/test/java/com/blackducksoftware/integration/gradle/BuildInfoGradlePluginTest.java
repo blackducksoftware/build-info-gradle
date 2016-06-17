@@ -18,38 +18,28 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import java.io.File;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.testfixtures.ProjectBuilder;
+import org.junit.Test;
 
-public class BDGradleUtil {
-	public static final String BUILD_ID_PROPERTY = "BuildId";
+public class BuildInfoGradlePluginTest {
+	@Test
+	public void canApplyPluginToProject() {
+		final Project project = ProjectBuilder.builder().build();
+		assertFalse(project.getPlugins().hasPlugin(BuildInfoGradlePlugin.class));
 
-	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
+		project.getPluginManager().apply(BuildInfoGradlePlugin.class);
 
-	public static final String DEPENDENCY_REPORT_OUTPUT = "DepedencyReportOutput";
+		assertTrue(project.getPlugins().hasPlugin(BuildInfoGradlePlugin.class));
 
-	public String getGAV(final String group, final String artifact, final String version) {
-		final StringBuilder gavBuilder = new StringBuilder();
-		gavBuilder.append(group);
-		gavBuilder.append(":");
-		gavBuilder.append(artifact);
-		gavBuilder.append(":");
-		gavBuilder.append(version);
-		return gavBuilder.toString();
-	}
-
-	public File findBuildDir(final Project project) {
-		File buildDir;
-
-		if (project.getRootProject() != null) {
-			final Project rootProject = project.getRootProject();
-			buildDir = rootProject.getBuildDir();
-		} else {
-			buildDir = project.getBuildDir();
-		}
-
-		return buildDir;
+		final Task task = project.getTasks().getByName("buildInfoCustomTask");
+		assertNotNull(task);
+		assertTrue(task instanceof BuildInfoCustomTask);
 	}
 
 }
