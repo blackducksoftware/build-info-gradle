@@ -38,10 +38,10 @@ import com.blackducksoftware.integration.build.BuildDependency;
 import com.blackducksoftware.integration.build.BuildInfo;
 import com.google.gson.Gson;
 
-public class BDCustomTaskTest {
+public class BuildInfoCustomTaskTest {
 	@After
 	public void testCleanup() {
-		System.clearProperty(BDGradleUtil.INCLUDED_CONFIGURATIONS_PROPERTY);
+		System.clearProperty(GradleUtil.INCLUDED_CONFIGURATIONS_PROPERTY);
 	}
 
 	public void cleanup(final File file) {
@@ -58,13 +58,13 @@ public class BDCustomTaskTest {
 	public void canAddTaskToProject() {
 		final Project project = ProjectBuilder.builder().build();
 		try {
-			project.getTasks().create("bdCustomTask", BDCustomTask.class);
+			project.getTasks().create("buildInfoCustomTask", BuildInfoCustomTask.class);
 
-			final Task task = project.getTasks().getByName("bdCustomTask");
+			final Task task = project.getTasks().getByName("buildInfoCustomTask");
 
 			assertNotNull(task);
 
-			assertTrue(task instanceof BDCustomTask);
+			assertTrue(task instanceof BuildInfoCustomTask);
 		} finally {
 			cleanup(project.getBuildDir());
 		}
@@ -74,9 +74,9 @@ public class BDCustomTaskTest {
 	public void canCreateBuildInfoFile() throws IOException {
 		final Project project = ProjectBuilder.builder().build();
 		try {
-			project.getTasks().create("bdCustomTask", BDCustomTask.class);
+			project.getTasks().create("buildInfoCustomTask", BuildInfoCustomTask.class);
 
-			final BDCustomTask task = (BDCustomTask) project.getTasks().getByName("bdCustomTask");
+			final BuildInfoCustomTask task = (BuildInfoCustomTask) project.getTasks().getByName("buildInfoCustomTask");
 
 			assertNotNull(task);
 
@@ -101,7 +101,7 @@ public class BDCustomTaskTest {
 
 	@Test
 	public void canCreateBuildInfoFileWithDependencies() throws IOException {
-		System.setProperty(BDGradleUtil.INCLUDED_CONFIGURATIONS_PROPERTY, "testingConfig,testingConfig2");
+		System.setProperty(GradleUtil.INCLUDED_CONFIGURATIONS_PROPERTY, "testingConfig,testingConfig2");
 		final Project project = ProjectBuilder.builder().build();
 		try {
 			project.getRepositories().add(project.getRepositories().mavenCentral());
@@ -115,13 +115,13 @@ public class BDCustomTaskTest {
 			testingConf3.getDependencies().add(dep);
 			testingConf3.getDependencies().add(dep2);
 
-			project.getTasks().create("bdCustomTask", BDCustomTask.class);
+			project.getTasks().create("buildInfoCustomTask", BuildInfoCustomTask.class);
 
-			final BDCustomTask task = (BDCustomTask) project.getTasks().getByName("bdCustomTask");
+			final BuildInfoCustomTask task = (BuildInfoCustomTask) project.getTasks().getByName("buildInfoCustomTask");
 
 			assertNotNull(task);
 
-			System.setProperty(BDGradleUtil.BUILD_ID_PROPERTY, "TestBuildId");
+			System.setProperty(GradleUtil.BUILD_ID_PROPERTY, "TestBuildId");
 
 			task.gatherDeps();
 
@@ -160,13 +160,13 @@ public class BDCustomTaskTest {
 			testingConf3.getDependencies().add(dep);
 			testingConf3.getDependencies().add(dep2);
 
-			project.getTasks().create("bdCustomTask", BDCustomTask.class);
+			project.getTasks().create("buildInfoCustomTask", BuildInfoCustomTask.class);
 
-			final BDCustomTask task = (BDCustomTask) project.getTasks().getByName("bdCustomTask");
+			final BuildInfoCustomTask task = (BuildInfoCustomTask) project.getTasks().getByName("buildInfoCustomTask");
 
 			assertNotNull(task);
 
-			System.setProperty(BDGradleUtil.BUILD_ID_PROPERTY, "TestBuildId");
+			System.setProperty(GradleUtil.BUILD_ID_PROPERTY, "TestBuildId");
 
 			task.gatherDeps();
 
