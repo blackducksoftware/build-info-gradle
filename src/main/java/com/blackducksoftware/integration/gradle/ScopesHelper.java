@@ -9,13 +9,13 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 
-public class ScopesManager {
+public class ScopesHelper {
 	private final Project project;
 	private Set<String> allAvailableScopes;
 	private Set<String> requestedScopes;
 	private final Map<String, Boolean> shouldIncludeScopeMap = new HashMap<>();
 
-	public ScopesManager(final Project project) {
+	public ScopesHelper(final Project project) {
 		this.project = project;
 		populateRequestedScopes();
 		populateAllAvailableScopes();
@@ -44,6 +44,15 @@ public class ScopesManager {
 		}
 	}
 
+	public boolean shouldIncludeConfigurationInDependencyGraph(final String configuration) {
+		// if none were specifically requested, only include compile
+		if (requestedScopes == null) {
+			return "compile".equals(configuration);
+		} else {
+			return shouldIncludeScope(configuration);
+		}
+	}
+
 	private void populateAllAvailableScopes() {
 		allAvailableScopes = new HashSet<>();
 
@@ -54,7 +63,7 @@ public class ScopesManager {
 	}
 
 	private void populateRequestedScopes() {
-		final String requestedScopesString = System.getProperty(GradleUtil.INCLUDED_CONFIGURATIONS_PROPERTY);
+		final String requestedScopesString = System.getProperty(PluginHelper.INCLUDED_CONFIGURATIONS_PROPERTY);
 		if (requestedScopesString != null && requestedScopesString.trim().length() > 0) {
 			requestedScopes = new HashSet<String>();
 			if (requestedScopesString.contains(",")) {
