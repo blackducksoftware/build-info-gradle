@@ -17,8 +17,10 @@ allprojects {
 repositories {
 	mavenLocal()
 	mavenCentral()
-	maven { url "https://updates.suite.blackducksoftware.com/integrations/" }
-	maven { url "https://oss.jfrog.org/artifactory/oss-snapshot-local/" }
+	maven { url "http://jcenter.bintray.com" }
+	maven { url "https://bintray.com/bds/oss" }
+	maven { url "https://updates.suite.blackducksoftware.com/integrations" }
+	maven { url "https://oss.jfrog.org/artifactory/oss-snapshot-local" }
 }
 
 dependencies {
