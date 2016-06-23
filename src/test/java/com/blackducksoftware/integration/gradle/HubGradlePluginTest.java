@@ -27,15 +27,17 @@ import org.gradle.api.Task;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
 
-public class BuildInfoGradlePluginTest {
+import com.blackducksoftware.integration.gradle.task.BuildInfoCustomTask;
+
+public class HubGradlePluginTest {
 	@Test
 	public void canApplyPluginToProject() {
 		final Project project = ProjectBuilder.builder().build();
-		assertFalse(project.getPlugins().hasPlugin(BuildInfoGradlePlugin.class));
+		assertFalse(project.getPlugins().hasPlugin(HubGradlePlugin.class));
 
-		project.getPluginManager().apply(BuildInfoGradlePlugin.class);
+		project.getPluginManager().apply(HubGradlePlugin.class);
 
-		assertTrue(project.getPlugins().hasPlugin(BuildInfoGradlePlugin.class));
+		assertTrue(project.getPlugins().hasPlugin(HubGradlePlugin.class));
 
 		final Task task = project.getTasks().getByName("buildInfoCustomTask");
 		assertNotNull(task);

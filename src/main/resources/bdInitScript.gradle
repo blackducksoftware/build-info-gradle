@@ -6,7 +6,7 @@ import org.gradle.BuildAdapter
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
-import com.blackducksoftware.integration.gradle.BuildInfoGradlePlugin
+import com.blackducksoftware.integration.gradle.HubGradlePlugin
 
 
 addListener(new BuildInfoPluginListener())
@@ -15,11 +15,9 @@ class BuildInfoPluginListener extends BuildAdapter {
 	def void projectsLoaded(Gradle gradle) {
 		gradle.startParameter.getProjectProperties().put("build.start", Long.toString(System.currentTimeMillis()))
 		Project root = gradle.getRootProject()
-		root.logger.debug("Gradle Build Info Plugin")
-		if (!"buildSrc".equals(root.name)) {
-			root.allprojects {
-				apply { apply plugin: BuildInfoGradlePlugin }
-			}
+		root.logger.debug("Hub Gradle Plugin")
+		root.allprojects {
+			apply { apply plugin: HubGradlePlugin }
 		}
 	}
 }

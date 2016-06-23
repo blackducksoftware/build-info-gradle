@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *******************************************************************************/
-package com.blackducksoftware.integration.gradle;
+package com.blackducksoftware.integration.gradle.task;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,37 +38,26 @@ import org.gradle.api.tasks.TaskAction;
 import com.blackducksoftware.integration.build.BuildArtifact;
 import com.blackducksoftware.integration.build.BuildDependency;
 import com.blackducksoftware.integration.build.BuildInfo;
+import com.blackducksoftware.integration.gradle.PluginHelper;
+import com.blackducksoftware.integration.gradle.ScopesHelper;
 import com.google.gson.Gson;
 
 public class BuildInfoCustomTask extends DefaultTask {
-	private final GradleUtil gradleUtil = new GradleUtil();
-
-	private File blackDuckDir;
-
-	public File getBlackDuckDir() {
-		return blackDuckDir;
-	}
+	private PluginHelper pluginHelper;
 
 	@TaskAction
-	public void gatherDeps() throws IOException {
+	public void gatherDependencies() throws IOException {
 		final Project project = getProject();
 
-		final File buildDir = gradleUtil.findBuildDir(project);
-
-		blackDuckDir = new File(buildDir, "BlackDuck/");
-		blackDuckDir.mkdirs();
-
-		System.out.println(blackDuckDir.getCanonicalPath());
-
 		BuildInfo oldBuildInfo = null;
-		final File file = new File(blackDuckDir.getCanonicalPath() + File.separator + BuildInfo.OUTPUT_FILE_NAME);
+		final File file = new File(
+				pluginHelper.getBlackDuckDirectory().getCanonicalPath() + File.separator + BuildInfo.OUTPUT_FILE_NAME);
 		if (file.exists()) {
 			// Read in the old build-info
 			// if it has the same build id, its probably a Gradle build with
 			// multiple projects
 			// so we add to the dependencies, instead of creating a new
 			// build-info.json
-
 			final StringBuilder buildInfoStringBuilder = new StringBuilder();
 			BufferedReader br = null;
 			try {
@@ -94,7 +83,7 @@ public class BuildInfoCustomTask extends DefaultTask {
 				oldBuildInfo = gson.fromJson(buildInfoString, BuildInfo.class);
 			}
 		}
-		final String buildId = System.getProperty(GradleUtil.BUILD_ID_PROPERTY);
+		final String buildId = System.getProperty(PluginHelper.BUILD_ID_PROPERTY);
 		System.out.println("BUILD ID : " + buildId);
 
 		BuildInfo buildInfo = null;
@@ -132,7 +121,7 @@ public class BuildInfoCustomTask extends DefaultTask {
 			buildInfo.setDependencies(new HashSet<BuildDependency>());
 		}
 
-		final ScopesManager scopesManager = new ScopesManager(project);
+		final ScopesHelper scopesHelper = new ScopesHelper(project);
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
 			final Set<ResolvedDependency> dependencies = configuration.getResolvedConfiguration()
@@ -145,27 +134,24 @@ public class BuildInfoCustomTask extends DefaultTask {
 						final String groupId = id.getGroup();
 						final String artifactId = id.getName();
 						final String version = id.getVersion();
-						addDependency(resolvedDependenciesMap, scope, groupId, artifactId, version, scopesManager);
+						addDependency(resolvedDependenciesMap, scope, groupId, artifactId, version, scopesHelper);
 					}
 				} else {
 					final String groupId = dependency.getModuleGroup();
 					final String artifactId = dependency.getModuleName();
 					final String version = dependency.getModuleVersion();
-					addDependency(resolvedDependenciesMap, scope, groupId, artifactId, version, scopesManager);
+					addDependency(resolvedDependenciesMap, scope, groupId, artifactId, version, scopesHelper);
 				}
 			}
 		}
 		final Set<BuildDependency> dependencies = new HashSet<BuildDependency>();
 		dependencies.addAll(resolvedDependenciesMap.values());
 		buildInfo.setDependencies(dependencies);
-		buildInfo.close(blackDuckDir);
-
-		final DependencyGatherer dependencyGatherer = new DependencyGatherer(project, scopesManager, blackDuckDir);
-		dependencyGatherer.handleBdioOutput();
+		buildInfo.close(pluginHelper.getBlackDuckDirectory());
 	}
 
 	private void addDependency(final Map<String, BuildDependency> dependenciesMap, final String scope,
-			final String group, final String artifact, final String version, final ScopesManager scopesManager) {
+			final String group, final String artifact, final String version, final ScopesHelper scopesHelper) {
 		final String externalId = group + ":" + artifact + ":" + version;
 		if (dependenciesMap.containsKey(externalId)) {
 			final BuildDependency existing = dependenciesMap.get(externalId);
@@ -173,7 +159,7 @@ public class BuildInfoCustomTask extends DefaultTask {
 				existing.getScopes().add(scope);
 			}
 		} else {
-			if (scopesManager.shouldIncludeScope(scope)) {
+			if (scopesHelper.shouldIncludeScope(scope)) {
 				final BuildDependency buildDependency = new BuildDependency();
 				buildDependency.setGroup(group);
 				buildDependency.setArtifact(artifact);
@@ -185,6 +171,10 @@ public class BuildInfoCustomTask extends DefaultTask {
 				dependenciesMap.put(externalId, buildDependency);
 			}
 		}
+	}
+
+	public void setPluginHelper(final PluginHelper pluginHelper) {
+		this.pluginHelper = pluginHelper;
 	}
 
 }

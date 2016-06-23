@@ -14,20 +14,18 @@ import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.artifacts.ResolvedDependency;
 
 import com.blackducksoftware.integration.build.bdio.BdioConverter;
+import com.blackducksoftware.integration.build.bdio.BdioIdCreator;
 import com.blackducksoftware.integration.build.bdio.CommonBomFormatter;
 import com.blackducksoftware.integration.build.bdio.Constants;
 import com.blackducksoftware.integration.build.bdio.DependencyNode;
 import com.blackducksoftware.integration.build.bdio.Gav;
-import com.blackducksoftware.integration.build.bdio.MavenIdCreator;
 
 public class DependencyGatherer {
 	private final Project project;
-	private final ScopesManager scopesManager;
 	private final File blackDuckDir;
 
-	public DependencyGatherer(final Project project, final ScopesManager scopesManager, final File blackDuckDir) {
+	public DependencyGatherer(final Project project, final File blackDuckDir) {
 		this.project = project;
-		this.scopesManager = scopesManager;
 		this.blackDuckDir = blackDuckDir;
 	}
 
@@ -43,10 +41,10 @@ public class DependencyGatherer {
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode root = new DependencyNode(projectGav, children);
 
+		final ScopesHelper scopesHelper = new ScopesHelper(project);
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
-			final String scope = configuration.getName();
-			if (scopesManager.shouldIncludeScope(scope)) {
+			if (scopesHelper.shouldIncludeConfigurationInDependencyGraph(configuration.getName())) {
 				final ResolvedConfiguration resolvedConfiguration = configuration.getResolvedConfiguration();
 				final Set<ResolvedDependency> resolvedDependencies = resolvedConfiguration
 						.getFirstLevelModuleDependencies();
@@ -57,20 +55,17 @@ public class DependencyGatherer {
 		}
 
 		try (final OutputStream outputStream = new FileOutputStream(file)) {
-			final MavenIdCreator mavenIdCreator = new MavenIdCreator();
-			final BdioConverter bdioConverter = new BdioConverter(mavenIdCreator);
+			final BdioIdCreator bdioCreator = new BdioIdCreator();
+			final BdioConverter bdioConverter = new BdioConverter(bdioCreator);
 			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
-			commonBomFormatter.writeProject(outputStream, project.getName(), root);
+			commonBomFormatter.writeProject(outputStream, project.getName(), project.getBuildFile().getCanonicalPath(),
+					root);
 			System.out.println("Created Black Duck I/O json: " + file.getAbsolutePath());
 		}
 	}
 
 	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency) {
-		final String groupId = resolvedDependency.getModuleGroup();
-		final String artifactId = resolvedDependency.getModuleName();
-		final String version = resolvedDependency.getModuleVersion();
-
-		final Gav gav = new Gav(groupId, artifactId, version);
+		final Gav gav = createGavFromDependencyNode(resolvedDependency);
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode dependencyNode = new DependencyNode(gav, children);
 
@@ -79,6 +74,15 @@ public class DependencyGatherer {
 		}
 
 		return dependencyNode;
+	}
+
+	private Gav createGavFromDependencyNode(final ResolvedDependency resolvedDependency) {
+		final String groupId = resolvedDependency.getModuleGroup();
+		final String artifactId = resolvedDependency.getModuleName();
+		final String version = resolvedDependency.getModuleVersion();
+
+		final Gav gav = new Gav(groupId, artifactId, version);
+		return gav;
 	}
 
 }
