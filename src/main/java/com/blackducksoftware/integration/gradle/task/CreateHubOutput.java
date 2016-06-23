@@ -21,6 +21,7 @@ package com.blackducksoftware.integration.gradle.task;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -28,20 +29,36 @@ import org.gradle.api.tasks.TaskAction;
 import com.blackducksoftware.integration.gradle.DependencyGatherer;
 import com.blackducksoftware.integration.gradle.PluginHelper;
 
-public class HubBdioGenerationTask extends DefaultTask {
+public class CreateHubOutput extends DefaultTask {
 	private PluginHelper pluginHelper;
+	private String outputDirectory;
 
 	@TaskAction
 	public void gatherDependencies() throws IOException {
 		final Project project = getProject();
-		final File blackDuckDirectory = pluginHelper.getBlackDuckDirectory();
+		File output = pluginHelper.getBlackDuckDirectory();
+		if (StringUtils.isNotBlank(outputDirectory)) {
+			output = new File(outputDirectory);
+		}
 
-		final DependencyGatherer dependencyGatherer = new DependencyGatherer(project, blackDuckDirectory);
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(pluginHelper, project, output);
 		dependencyGatherer.handleBdioOutput();
+	}
+
+	public PluginHelper getPluginHelper() {
+		return pluginHelper;
 	}
 
 	public void setPluginHelper(final PluginHelper pluginHelper) {
 		this.pluginHelper = pluginHelper;
+	}
+
+	public String getOutputDirectory() {
+		return outputDirectory;
+	}
+
+	public void setOutputDirectory(final String outputDirectory) {
+		this.outputDirectory = outputDirectory;
 	}
 
 }
