@@ -23,6 +23,8 @@ import java.io.File;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 
+import com.blackducksoftware.integration.build.bdio.Constants;
+
 public class PluginHelper {
 	public static final String BUILD_ID_PROPERTY = "BuildId";
 	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
@@ -55,6 +57,10 @@ public class PluginHelper {
 		gavBuilder.append(":");
 		gavBuilder.append(version);
 		return gavBuilder.toString();
+	}
+
+	public File getBdioFile(final File parentDirectory, final String artifactId) {
+		return new File(parentDirectory, artifactId + Constants.BDIO_FILE_SUFFIX);
 	}
 
 	public File getBlackDuckDirectory() {

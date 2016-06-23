@@ -34,6 +34,8 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.build.BuildArtifact;
 import com.blackducksoftware.integration.build.BuildDependency;
@@ -43,6 +45,8 @@ import com.blackducksoftware.integration.gradle.ScopesHelper;
 import com.google.gson.Gson;
 
 public class BuildInfoCustomTask extends DefaultTask {
+	private final Logger logger = LoggerFactory.getLogger(BuildInfoCustomTask.class);
+
 	private PluginHelper pluginHelper;
 
 	@TaskAction
@@ -84,12 +88,12 @@ public class BuildInfoCustomTask extends DefaultTask {
 			}
 		}
 		final String buildId = System.getProperty(PluginHelper.BUILD_ID_PROPERTY);
-		System.out.println("BUILD ID : " + buildId);
+		logger.info("BUILD ID : " + buildId);
 
 		BuildInfo buildInfo = null;
 		if (oldBuildInfo != null && oldBuildInfo.getBuildId().equals(buildId)) {
 			// This must be a sub project in a multi-project gradle Build
-			System.out.println("Will add to the build-info.json file");
+			logger.info("Will add to the build-info.json file");
 
 			buildInfo = oldBuildInfo;
 		} else {
@@ -97,7 +101,7 @@ public class BuildInfoCustomTask extends DefaultTask {
 			// was no build-info.json file OR
 			// the buildId did not match in which case the build-info.json is
 			// from a different Build
-			System.out.println("Will create build-info.json file");
+			logger.info("Will create build-info.json file");
 
 			buildInfo = new BuildInfo();
 			buildInfo.setBuildId(buildId);
