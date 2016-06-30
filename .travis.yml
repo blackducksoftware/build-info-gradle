@@ -19,6 +19,6 @@ notifications:
 
 install: true
 script:
-  - ./gradlew clean assemble
+  - ./gradlew clean build
 after_success:
   - ./gradlew test jacocoTestReport coveralls
