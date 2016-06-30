@@ -19,6 +19,8 @@ Add the following to the top of your build.gradle file:
 ```
 buildscript {
     repositories {
+        mavenCentral()
+        maven { url "http://jcenter.bintray.com" }
         maven { url "https://updates.suite.blackducksoftware.com/integrations" }
     }
     dependencies {
@@ -26,6 +28,13 @@ buildscript {
     }
 }
 apply plugin: 'com.blackducksoftware.hub'
+```
+
+You can specify your own outputDirectory with the following:
+```
+createHubOutput {
+    outputDirectory = "/any/directory/of/your/choosing"
+}
 ```
 
 ## License ##
