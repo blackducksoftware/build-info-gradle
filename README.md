@@ -21,10 +21,9 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "http://jcenter.bintray.com" }
-        maven { url "https://updates.suite.blackducksoftware.com/integrations" }
     }
     dependencies {
-        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '2.0.3'
+        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '2.0.4'
     }
 }
 apply plugin: 'com.blackducksoftware.hub'

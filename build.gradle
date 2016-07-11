@@ -26,9 +26,6 @@ group='com.blackducksoftware.integration'
 version='2.0.4-SNAPSHOT'
 description='Custom Gradle Plugin to create a build-info.json file'
 
-println sonatypeUsername
-println sonatypePassword
-
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
@@ -86,6 +83,8 @@ uploadArchives {
 			}
 		}
 	}
+
+	println "Uploading ${rootProject.name} version ${version} to maven central."
 }
 
 jacoco { toolVersion = '0.7.6.201602180812' }
