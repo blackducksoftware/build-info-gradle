@@ -113,4 +113,7 @@ artifacts {
 	archives javadocJar
 }
 
-signing { sign configurations.archives }
+signing {
+	required { gradle.taskGraph.hasTask("uploadArchives") }
+	sign configurations.archives
+}
