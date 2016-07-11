@@ -12,7 +12,7 @@ Tasks:
 [![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-gradle-plugin/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-gradle-plugin?branch=master)
 
 ## Where can I get the latest release? ##
-You can download the latest source from GitHub: https://github.com/blackducksoftware/hub-gradle-plugin. 
+You can download the latest release from Maven Central.
 
 ## Configuration
 Add the following to the top of your build.gradle file:
@@ -35,6 +35,16 @@ You can specify your own outputDirectory with the following:
 createHubOutput {
     outputDirectory = "/any/directory/of/your/choosing"
 }
+```
+
+You can find all available tasks by running:
+```
+gradle tasks --all
+```
+
+And you can create the output for the Hub by running:
+```
+gradle createHubOutput
 ```
 
 ## License ##
