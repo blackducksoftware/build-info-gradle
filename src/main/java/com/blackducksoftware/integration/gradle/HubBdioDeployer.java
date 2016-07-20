@@ -22,16 +22,26 @@
 package com.blackducksoftware.integration.gradle;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.gradle.api.Project;
+import org.restlet.data.MediaType;
+import org.restlet.representation.FileRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
 import com.blackducksoftware.integration.hub.builder.ValidationResults;
+import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
 import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -90,9 +100,13 @@ public class HubBdioDeployer {
 		if (results.isSuccess()) {
 			try {
 				final HubServerConfig config = results.getConstructedObject();
-				uploadFileToHub(config);
+				uploadFileToHub(config, file);
 			} catch (final URISyntaxException e) {
-				logger.error("Hub URI invalid: " + e.getMessage());
+				logger.error("Hub URI invalid: ", e);
+			} catch (final IllegalArgumentException | BDRestException | EncryptionException | IOException e) {
+				logger.error("Cannot communicate with hub server.", e);
+			} catch (final ResourceDoesNotExistException e) {
+				logger.error("Cannot upload the file to the hub server.", e);
 			}
 		} else {
 			logErrors(results);
@@ -101,15 +115,26 @@ public class HubBdioDeployer {
 		logger.info("Deployed Black Duck I/O json: " + file.getAbsolutePath());
 	}
 
-	private void uploadFileToHub(final HubServerConfig config) throws URISyntaxException {
+	private void uploadFileToHub(final HubServerConfig config, final File file) throws URISyntaxException,
+			IllegalArgumentException, BDRestException, EncryptionException, IOException, ResourceDoesNotExistException {
 		final RestConnection connection = new RestConnection(config.getHubUrl().toString());
 		final HubProxyInfo proxyInfo = config.getProxyInfo();
 		if (proxyInfo.shouldUseProxyForUrl(config.getHubUrl())) {
 			connection.setProxyProperties(proxyInfo);
 		}
 
-		// final HubIntRestService service = new HubIntRestService(connection);
-		// TODO: implement the rest call to upload the BDIO file
+		connection.setCookies(config.getGlobalCredentials().getUsername(),
+				config.getGlobalCredentials().getDecryptedPassword());
+
+		final List<String> urlSegments = new ArrayList<>();
+		urlSegments.add("api");
+		urlSegments.add("v1");
+		urlSegments.add("bom-import");
+		final Set<SimpleEntry<String, String>> queryParameters = new HashSet<>();
+		final FileRepresentation content = new FileRepresentation(file, new MediaType("application/ld+json"));
+		final String location = connection.httpPostFromRelativeUrl(urlSegments, queryParameters, content);
+
+		logger.info("Uploaded the file: " + file + " to " + location);
 	}
 
 	private void logErrors(final ValidationResults<GlobalFieldKey, HubServerConfig> results) {
