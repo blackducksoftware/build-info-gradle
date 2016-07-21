@@ -23,14 +23,14 @@ repositories {
 }
 
 group='com.blackducksoftware.integration'
-version='2.0.5-SNAPSHOT'
+version='2.0.5'
 description='Custom Gradle Plugin to create a build-info.json file'
 
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
 	compile group: 'com.blackducksoftware.integration', name: 'build-info-common', version: '2.0.3'
-	compile group: 'com.blackducksoftware.integration', name: 'hub-common', version: '1.4.1'
+	compile group: 'com.blackducksoftware.integration', name: 'hub-common', version: '1.4.3'
 	compile group: 'com.google.code.gson', name: 'gson', version: '2.2.4'
 }
 
