@@ -82,7 +82,7 @@ public class HubBdioDeployer {
 	}
 
 	public void deployToHub() {
-		logger.info("deploying bdio output");
+		logger.info("Deploying Black Duck I/O output");
 		final File file = pluginHelper.getBdioFile(output, project.getName());
 
 		final HubServerConfigBuilder builder = new HubServerConfigBuilder();
@@ -112,7 +112,7 @@ public class HubBdioDeployer {
 			logErrors(results);
 		}
 
-		logger.info("Deployed Black Duck I/O json: " + file.getAbsolutePath());
+		logger.info("Deployed Black Duck I/O file: " + file.getAbsolutePath());
 	}
 
 	private void uploadFileToHub(final HubServerConfig config, final File file) throws URISyntaxException,
@@ -131,10 +131,10 @@ public class HubBdioDeployer {
 		urlSegments.add("v1");
 		urlSegments.add("bom-import");
 		final Set<SimpleEntry<String, String>> queryParameters = new HashSet<>();
-		final FileRepresentation content = new FileRepresentation(file, new MediaType("application/ld+json"));
+		final FileRepresentation content = new FileRepresentation(file, new MediaType(Constants.BDIO_FILE_MEDIA_TYPE));
 		final String location = connection.httpPostFromRelativeUrl(urlSegments, queryParameters, content);
 
-		logger.info("Uploaded the file: " + file + " to " + location);
+		logger.info("Uploaded the file: " + file + " to " + config.getHubUrl().toString());
 	}
 
 	private void logErrors(final ValidationResults<GlobalFieldKey, HubServerConfig> results) {
