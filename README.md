@@ -23,7 +23,7 @@ buildscript {
         maven { url "http://jcenter.bintray.com" }
     }
     dependencies {
-        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '2.0.4'
+        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '2.0.6'
     }
 }
 apply plugin: 'com.blackducksoftware.hub'
@@ -33,6 +33,22 @@ You can specify your own outputDirectory with the following:
 ```
 createHubOutput {
     outputDirectory = "/any/directory/of/your/choosing"
+}
+```
+
+If you have created the output in /any/directory/of/your/choosing, you can deploy to the Hub with the following:
+```
+deployHubOutput {
+  outputDirectory = "/any/directory/of/your/choosing"
+  hubUrl = "http://localhost:8080"
+	hubUsername = "sysadmin"
+	hubPassword = "blackduck"
+	hubTimeout = "120"
+	hubProxyHost = ""
+	hubProxyPort = ""
+	hubNoProxyHosts = ""
+	hubProxyUsername = ""
+	hubProxyPassword = ""
 }
 ```
 
