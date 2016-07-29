@@ -14,7 +14,7 @@ Tasks:
 ## Where can I get the latest release? ##
 You can download the latest release from Maven Central.
 
-## Documentation ## 
+## Documentation 
 
 All documentation for hub-gradle-plugin located on the wiki: https://github.com/blackducksoftware/hub-gradle-plugin/wiki
 
