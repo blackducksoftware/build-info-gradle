@@ -15,6 +15,13 @@ Tasks:
 You can download the latest release from Maven Central.
 
 ## Configuration
+Add the following repository:
+```
+repositories {
+  mavenCentral()
+}
+```
+
 Add the following to the top of your build.gradle file:
 ```
 buildscript {
@@ -36,7 +43,7 @@ createHubOutput {
 }
 ```
 
-If you have created the output in /any/directory/of/your/choosing, you can deploy to the Hub with the following:
+You can specify your Hub configuration (if you created the output in /any/directory/of/your/choosing) as follows:
 ```
 deployHubOutput {
   outputDirectory = "/any/directory/of/your/choosing"
@@ -57,9 +64,19 @@ You can find all available tasks by running:
 gradle tasks --all
 ```
 
-And you can create the output for the Hub by running:
+You can create the output for the Hub by running:
 ```
 gradle createHubOutput
+```
+
+You can deploy the output to the Hub by running:
+```
+gradle deployHubOutput
+```
+
+Or combine them, to create then deploy:
+```
+gradle createHubOutput deployHubOutput
 ```
 
 ## License ##
