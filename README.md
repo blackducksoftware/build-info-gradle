@@ -14,70 +14,9 @@ Tasks:
 ## Where can I get the latest release? ##
 You can download the latest release from Maven Central.
 
-## Configuration
-Add the following repository:
-```
-repositories {
-  mavenCentral()
-}
-```
+## Documentation ## 
 
-Add the following to the top of your build.gradle file:
-```
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "http://jcenter.bintray.com" }
-    }
-    dependencies {
-        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '2.0.6'
-    }
-}
-apply plugin: 'com.blackducksoftware.hub'
-```
-
-You can specify your own outputDirectory with the following:
-```
-createHubOutput {
-    outputDirectory = "/any/directory/of/your/choosing"
-}
-```
-
-You can specify your Hub configuration (if you created the output in /any/directory/of/your/choosing) as follows:
-```
-deployHubOutput {
-  outputDirectory = "/any/directory/of/your/choosing"
-  hubUrl = "http://localhost:8080"
-	hubUsername = "sysadmin"
-	hubPassword = "blackduck"
-	hubTimeout = "120"
-	hubProxyHost = ""
-	hubProxyPort = ""
-	hubNoProxyHosts = ""
-	hubProxyUsername = ""
-	hubProxyPassword = ""
-}
-```
-
-You can find all available tasks by running:
-```
-gradle tasks --all
-```
-
-You can create the output for the Hub by running:
-```
-gradle createHubOutput
-```
-
-You can deploy the output to the Hub by running:
-```
-gradle deployHubOutput
-```
-
-Or combine them, to create then deploy:
-```
-gradle createHubOutput deployHubOutput
-```
+All documentation for hub-gradle-plugin located on the wiki: https://github.com/blackducksoftware/hub-gradle-plugin/wiki
 
 ## License ##
 Apache License 2.0
