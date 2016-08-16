@@ -122,10 +122,3 @@ signing {
 	required { gradle.taskGraph.hasTask("uploadArchives") }
 	sign configurations.archives
 }
-
-sonarqube {
-	properties {
-		property "sonar.projectName", "TEST-Hub-Gradle-Plugin"
-		property "sonar.projectKey", "com.blackducksoftware:test-hub-gradle-plugin"
-	}
-}
