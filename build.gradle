@@ -5,6 +5,7 @@ plugins {
 	id 'eclipse'
 	id 'com.github.kt3k.coveralls' version '2.6.3'
 	id 'jacoco'
+	id 'org.sonarqube' version '2.0.1'
 }
 
 compileJava.options.encoding = 'UTF-8'
@@ -87,7 +88,9 @@ uploadArchives {
 	println "Uploading ${rootProject.name} version ${version} to maven central."
 }
 
-jacoco { toolVersion = '0.7.6.201602180812' }
+ext.jacocoVersion = System.properties['jacoco.version'] ?: '0.7.6.201602180812'
+
+jacoco { toolVersion = jacocoVersion }
 
 jacocoTestReport {
 	reports { xml.enabled = true }
@@ -118,4 +121,11 @@ artifacts {
 signing {
 	required { gradle.taskGraph.hasTask("uploadArchives") }
 	sign configurations.archives
+}
+
+sonarqube {
+	properties {
+		property "sonar.projectName", "TEST-Hub-Gradle-Plugin"
+		property "sonar.projectKey", "com.blackducksoftware:test-hub-gradle-plugin"
+	}
 }
