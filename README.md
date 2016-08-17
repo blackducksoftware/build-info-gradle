@@ -19,4 +19,4 @@ You can download the latest release from Maven Central.
 All documentation for hub-gradle-plugin located on the wiki: https://github.com/blackducksoftware/hub-gradle-plugin/wiki
 
 ## License ##
-Apache License 2.0
+Apache License 2.0 
