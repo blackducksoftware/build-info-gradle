@@ -45,25 +45,41 @@ public class DependencyGatherer {
 	private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
 
 	private final PluginHelper pluginHelper;
-	private final Project project;
+	private final Project rootProject;
 	private final File output;
 
 	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output) {
 		this.pluginHelper = pluginHelper;
-		this.project = project;
+		this.rootProject = project;
 		this.output = output;
 	}
 
 	public void handleBdioOutput() throws IOException {
 		logger.info("creating bdio output");
-		final String groupId = project.getGroup().toString();
-		final String artifactId = project.getName();
-		final String version = project.getVersion().toString();
+		final String groupId = rootProject.getGroup().toString();
+		final String artifactId = rootProject.getName();
+		final String version = rootProject.getVersion().toString();
 		final Gav projectGav = new Gav(groupId, artifactId, version);
 
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode root = new DependencyNode(projectGav, children);
 
+		getProjectDependencies(rootProject, children);
+		for (final Project childProject : rootProject.getChildProjects().values()) {
+			getProjectDependencies(childProject, children);
+		}
+
+		final File file = pluginHelper.getBdioFile(output, artifactId);
+		try (final OutputStream outputStream = new FileOutputStream(file)) {
+			final BdioConverter bdioConverter = new BdioConverter();
+			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
+			commonBomFormatter.writeProject(outputStream, rootProject.getName(), root);
+		}
+
+		logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
+	}
+
+	private void getProjectDependencies(final Project project, final List<DependencyNode> children) {
 		final ScopesHelper scopesHelper = new ScopesHelper(project);
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
@@ -76,15 +92,6 @@ public class DependencyGatherer {
 				}
 			}
 		}
-
-		final File file = pluginHelper.getBdioFile(output, artifactId);
-		try (final OutputStream outputStream = new FileOutputStream(file)) {
-			final BdioConverter bdioConverter = new BdioConverter();
-			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
-			commonBomFormatter.writeProject(outputStream, project.getName(), root);
-		}
-
-		logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
 	}
 
 	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency) {
