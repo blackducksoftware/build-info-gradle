@@ -89,7 +89,6 @@ uploadArchives {
 }
 
 ext.jacocoVersion = System.properties['jacoco.version'] ?: '0.7.6.201602180812'
-
 jacoco { toolVersion = jacocoVersion }
 
 jacocoTestReport {
