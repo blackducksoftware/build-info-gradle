@@ -92,9 +92,9 @@ public class BuildInfoCustomTask extends DefaultTask {
 		}
 		final String buildId = System.getProperty(PluginHelper.BUILD_ID_PROPERTY);
 		logger.info("BUILD ID : " + buildId);
-
-		BuildInfo buildInfo = null;
-		if (oldBuildInfo != null && oldBuildInfo.getBuildId().equals(buildId)) {
+		BuildInfo buildInfo;
+		if (oldBuildInfo != null && oldBuildInfo.getBuildArtifact() != null && buildId != null
+				&& oldBuildInfo.getBuildId().equals(buildId)) {
 			// This must be a sub project in a multi-project gradle Build
 			logger.info("Will add to the build-info.json file");
 
