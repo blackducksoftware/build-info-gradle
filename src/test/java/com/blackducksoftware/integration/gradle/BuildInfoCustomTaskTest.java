@@ -21,9 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.gradle.internal.impldep.org.junit.Assert.assertEquals;
+import static org.gradle.internal.impldep.org.junit.Assert.assertNotNull;
+import static org.gradle.internal.impldep.org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
