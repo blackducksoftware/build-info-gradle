@@ -65,7 +65,7 @@ public class DependencyGatherer {
 		final DependencyNode root = new DependencyNode(projectGav, children);
 
 		getProjectDependencies(rootProject, children);
-		for (final Project childProject : rootProject.getChildProjects().values()) {
+		for (final Project childProject : rootProject.getAllprojects()) {
 			getProjectDependencies(childProject, children);
 		}
 
