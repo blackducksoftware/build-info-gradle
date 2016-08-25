@@ -65,15 +65,8 @@ public class DependencyGatherer {
 		final DependencyNode root = new DependencyNode(projectGav, children);
 
 		getProjectDependencies(rootProject, children);
-		for (final Project childProject : rootProject.getChildProjects().values()) {
-			// do the child projects have subprojects?
-			if (childProject.getSubprojects() != null && childProject.getSubprojects().size() > 0) {
-				for (final Project grandChild: childProject.getSubprojects()) {
-					getProjectDependencies(grandChild, children);
-				}
-			} else {
-				getProjectDependencies(childProject, children);
-			}
+		for (final Project childProject : rootProject.getAllprojects()) {
+			getProjectDependencies(childProject, children);
 		}
 
 		final File file = pluginHelper.getBdioFile(output, artifactId);
