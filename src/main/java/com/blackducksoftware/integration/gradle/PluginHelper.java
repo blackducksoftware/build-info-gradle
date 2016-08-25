@@ -43,9 +43,9 @@ public class PluginHelper {
 			file = new File(baseDirectory);
 		} else if (project.getRootProject() != null) {
 			final Project rootProject = project.getRootProject();
-			file = rootProject.getProjectDir();
+			file = new File(rootProject.getBuildDir(), "reports");
 		} else {
-			file = project.getProjectDir();
+			file = new File(project.getBuildDir(), "reports");
 		}
 
 		blackDuckDirectory = new File(file, "BlackDuck");
