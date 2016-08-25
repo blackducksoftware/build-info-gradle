@@ -21,13 +21,10 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.blackducksoftware.integration.build.BuildDependency;
+import com.blackducksoftware.integration.build.BuildInfo;
+import com.blackducksoftware.integration.gradle.task.BuildInfoCustomTask;
+import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -40,10 +37,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.blackducksoftware.integration.build.BuildDependency;
-import com.blackducksoftware.integration.build.BuildInfo;
-import com.blackducksoftware.integration.gradle.task.BuildInfoCustomTask;
-import com.google.gson.Gson;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class BuildInfoCustomTaskTest {
 	@Rule
@@ -188,4 +190,26 @@ public class BuildInfoCustomTaskTest {
 		buildInfoCustomTask.setPluginHelper(pluginHelper);
 	}
 
+	@Test
+	public void testNullBuildIdFromPreviousBuildsBuildInfoJsonFile() throws IOException {
+		// setup
+		final Project project = ProjectBuilder.builder().build();
+		project.getRepositories().add(project.getRepositories().mavenCentral());
+		createBuildInfoCustomTask(project);
+		String path = new PluginHelper(project).getBlackDuckDirectory().getCanonicalPath()
+				+ File.separator + BuildInfo.OUTPUT_FILE_NAME;
+		Gson gson = new Gson();
+
+		// create null buildInfo from json file error case
+		BuildInfo oldBuildInfo = new File(path).exists()
+				? gson.fromJson(new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8), BuildInfo.class)
+				: new BuildInfo();
+		oldBuildInfo.setBuildId(null);
+		Files.write(Paths.get(path), gson.toJson(oldBuildInfo).getBytes());
+
+		final BuildInfoCustomTask task = (BuildInfoCustomTask) project.getTasks().getByName("buildInfoCustomTask");
+		assertNotNull(task);
+
+		task.gatherDependencies();
+	}
 }
