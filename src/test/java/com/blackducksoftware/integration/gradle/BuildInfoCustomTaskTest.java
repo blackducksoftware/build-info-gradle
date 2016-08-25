@@ -21,9 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static org.gradle.internal.impldep.org.junit.Assert.assertEquals;
-import static org.gradle.internal.impldep.org.junit.Assert.assertNotNull;
-import static org.gradle.internal.impldep.org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +33,12 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.internal.impldep.org.junit.After;
-import org.gradle.internal.impldep.org.junit.Before;
-import org.gradle.internal.impldep.org.junit.Rule;
-import org.gradle.internal.impldep.org.junit.Test;
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.blackducksoftware.integration.build.BuildDependency;
 import com.blackducksoftware.integration.build.BuildInfo;
