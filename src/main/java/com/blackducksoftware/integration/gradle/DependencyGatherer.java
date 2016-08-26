@@ -87,7 +87,7 @@ public class DependencyGatherer {
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
 			if (scopesHelper.shouldIncludeConfigurationInDependencyGraph(configuration.getName())) {
-				logger.info("Resolving dependencies for project: " + project.getName());
+				logger.debug("Resolving dependencies for project: " + project.getName());
 				final ResolvedConfiguration resolvedConfiguration = configuration.getResolvedConfiguration();
 				final Set<ResolvedDependency> resolvedDependencies = resolvedConfiguration
 						.getFirstLevelModuleDependencies();
@@ -98,7 +98,7 @@ public class DependencyGatherer {
 		}
 	}
 
-	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, int level) {
+	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, final int level) {
 		final String gavKey = createGavKey(resolvedDependency);
 		final StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < level; i++) {
@@ -106,18 +106,16 @@ public class DependencyGatherer {
 		}
 		final String buffer = sb.toString();
 		if (visitedMap.containsKey(gavKey)) {
-			logger.info(buffer + gavKey + " already resolved getting from map.");
+			logger.debug(buffer + gavKey + " (already visited)");
 			return visitedMap.get(gavKey);
 		} else {
 			final Gav gav = createGavFromDependencyNode(resolvedDependency);
-			logger.info(buffer + gavKey + " created.");
-			logger.info(buffer + gavKey + " start dependencies");
+			logger.debug(buffer + gavKey + " (created)");
 			final List<DependencyNode> children = new ArrayList<>();
 			final DependencyNode dependencyNode = new DependencyNode(gav, children);
 			for (final ResolvedDependency child : resolvedDependency.getChildren()) {
-				children.add(createCommonDependencyNode(child, level++));
+				children.add(createCommonDependencyNode(child, level + 1));
 			}
-			logger.info(buffer + gavKey + " finished dependencies");
 			visitedMap.put(gavKey, dependencyNode);
 			return dependencyNode;
 		}
