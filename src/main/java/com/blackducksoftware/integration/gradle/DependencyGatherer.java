@@ -26,7 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.gradle.api.Project;
@@ -48,6 +50,8 @@ public class DependencyGatherer {
 	private final Project rootProject;
 	private final File output;
 
+	private final Map<String, DependencyNode> visitedMap = new HashMap<>();
+
 	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output) {
 		this.pluginHelper = pluginHelper;
 		this.rootProject = project;
@@ -64,7 +68,6 @@ public class DependencyGatherer {
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode root = new DependencyNode(projectGav, children);
 		logger.info("creating bdio graph");
-		getProjectDependencies(rootProject, children);
 		for (final Project childProject : rootProject.getAllprojects()) {
 			getProjectDependencies(childProject, children);
 		}
@@ -96,19 +99,31 @@ public class DependencyGatherer {
 	}
 
 	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency) {
-		final Gav gav = createGavFromDependencyNode(resolvedDependency);
-		final String gavStr = gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion();
-		logger.info(gavStr + " created.");
-		logger.info(gavStr + " start dependencies");
-		final List<DependencyNode> children = new ArrayList<>();
-		final DependencyNode dependencyNode = new DependencyNode(gav, children);
-		logger.info(gavStr + " children: " + resolvedDependency.getChildren().size());
-		for (final ResolvedDependency child : resolvedDependency.getChildren()) {
-			logger.info(gavStr + " resolving child dependencies");
-			children.add(createCommonDependencyNode(child));
+		final String gavKey = createGavKey(resolvedDependency);
+		if (visitedMap.containsKey(gavKey)) {
+			logger.info(gavKey + " already resolved getting from map.");
+			return visitedMap.get(gavKey);
+		} else {
+			final Gav gav = createGavFromDependencyNode(resolvedDependency);
+			logger.info(gavKey + " created.");
+			logger.info(gavKey + " start dependencies");
+			final List<DependencyNode> children = new ArrayList<>();
+			final DependencyNode dependencyNode = new DependencyNode(gav, children);
+			logger.info(gavKey + " children: " + resolvedDependency.getChildren().size());
+			for (final ResolvedDependency child : resolvedDependency.getChildren()) {
+				logger.info(gavKey + " resolving child dependencies");
+				children.add(createCommonDependencyNode(child));
+			}
+			logger.info(gavKey + " finished dependencies");
+			visitedMap.put(gavKey, dependencyNode);
+			return dependencyNode;
 		}
-		logger.info(gavStr + " finished dependencies");
-		return dependencyNode;
+	}
+
+	private String createGavKey(final ResolvedDependency resolvedDependency) {
+		final String gavKey = resolvedDependency.getModuleGroup() + ":" + resolvedDependency.getModuleName() + ":"
+				+ resolvedDependency.getModuleVersion();
+		return gavKey;
 	}
 
 	private Gav createGavFromDependencyNode(final ResolvedDependency resolvedDependency) {
