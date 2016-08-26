@@ -63,12 +63,12 @@ public class DependencyGatherer {
 
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode root = new DependencyNode(projectGav, children);
-
+		logger.info("creating bdio graph");
 		getProjectDependencies(rootProject, children);
 		for (final Project childProject : rootProject.getAllprojects()) {
 			getProjectDependencies(childProject, children);
 		}
-
+		logger.info("creating bdio file");
 		final File file = pluginHelper.getBdioFile(output, artifactId);
 		try (final OutputStream outputStream = new FileOutputStream(file)) {
 			final BdioConverter bdioConverter = new BdioConverter();
@@ -84,6 +84,7 @@ public class DependencyGatherer {
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
 			if (scopesHelper.shouldIncludeConfigurationInDependencyGraph(configuration.getName())) {
+				logger.info("Resolving dependencies for project: " + project.getName());
 				final ResolvedConfiguration resolvedConfiguration = configuration.getResolvedConfiguration();
 				final Set<ResolvedDependency> resolvedDependencies = resolvedConfiguration
 						.getFirstLevelModuleDependencies();
@@ -96,13 +97,17 @@ public class DependencyGatherer {
 
 	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency) {
 		final Gav gav = createGavFromDependencyNode(resolvedDependency);
+		final String gavStr = gav.getGroupId() + ":" + gav.getArtifactId() + ":" + gav.getVersion();
+		logger.info(gavStr + " created.");
+		logger.info(gavStr + " start dependencies");
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode dependencyNode = new DependencyNode(gav, children);
-
+		logger.info(gavStr + " children: " + resolvedDependency.getChildren().size());
 		for (final ResolvedDependency child : resolvedDependency.getChildren()) {
+			logger.info(gavStr + " resolving child dependencies");
 			children.add(createCommonDependencyNode(child));
 		}
-
+		logger.info(gavStr + " finished dependencies");
 		return dependencyNode;
 	}
 
