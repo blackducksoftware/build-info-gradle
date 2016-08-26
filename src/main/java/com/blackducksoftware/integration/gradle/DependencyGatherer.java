@@ -86,35 +86,50 @@ public class DependencyGatherer {
 		final ScopesHelper scopesHelper = new ScopesHelper(project);
 		final Set<Configuration> configurations = project.getConfigurations();
 		for (final Configuration configuration : configurations) {
-			if (scopesHelper.shouldIncludeConfigurationInDependencyGraph(configuration.getName())) {
+			final String configName = configuration.getName();
+			if (scopesHelper.shouldIncludeConfigurationInDependencyGraph(configName)) {
 				logger.debug("Resolving dependencies for project: " + project.getName());
 				final ResolvedConfiguration resolvedConfiguration = configuration.getResolvedConfiguration();
 				final Set<ResolvedDependency> resolvedDependencies = resolvedConfiguration
 						.getFirstLevelModuleDependencies();
 				for (final ResolvedDependency resolvedDependency : resolvedDependencies) {
-					children.add(createCommonDependencyNode(resolvedDependency, 0));
+					children.add(createCommonDependencyNode(resolvedDependency, 0, configName));
 				}
 			}
 		}
 	}
 
-	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, final int level) {
+	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, final int level,
+			final String configuration) {
 		final String gavKey = createGavKey(resolvedDependency);
+
 		final StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < level; i++) {
-			sb.append(" ");
+		if (logger.isDebugEnabled()) {
+			sb.append("|");
+			for (int i = 0; i < level; i++) {
+				sb.append(" ");
+			}
+			sb.append("(");
+			sb.append(level);
+			sb.append(")-> ");
 		}
 		final String buffer = sb.toString();
 		if (visitedMap.containsKey(gavKey)) {
-			logger.debug(buffer + gavKey + " (already visited)");
+			if (logger.isDebugEnabled()) {
+				logger.debug(buffer + gavKey + " (already visited) config: " + configuration);
+			}
 			return visitedMap.get(gavKey);
 		} else {
 			final Gav gav = createGavFromDependencyNode(resolvedDependency);
-			logger.debug(buffer + gavKey + " (created)");
+			if (logger.isDebugEnabled()) {
+				logger.debug(buffer + gavKey + " (created) config: " + configuration);
+			}
 			final List<DependencyNode> children = new ArrayList<>();
 			final DependencyNode dependencyNode = new DependencyNode(gav, children);
 			for (final ResolvedDependency child : resolvedDependency.getChildren()) {
-				children.add(createCommonDependencyNode(child, level + 1));
+				if (child.getConfiguration().equals(configuration)) {
+					children.add(createCommonDependencyNode(child, level + 1, configuration));
+				}
 			}
 			visitedMap.put(gavKey, dependencyNode);
 			return dependencyNode;
