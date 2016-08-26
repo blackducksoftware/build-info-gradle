@@ -24,7 +24,7 @@ repositories {
 }
 
 group='com.blackducksoftware.integration'
-version='2.0.8'
+version='2.0.9-SNAPSHOT'
 description='Custom Gradle Plugin to create a build-info.json file'
 
 dependencies {
