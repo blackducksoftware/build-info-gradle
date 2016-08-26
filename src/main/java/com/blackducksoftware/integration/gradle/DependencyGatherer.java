@@ -92,29 +92,32 @@ public class DependencyGatherer {
 				final Set<ResolvedDependency> resolvedDependencies = resolvedConfiguration
 						.getFirstLevelModuleDependencies();
 				for (final ResolvedDependency resolvedDependency : resolvedDependencies) {
-					children.add(createCommonDependencyNode(resolvedDependency));
+					children.add(createCommonDependencyNode(resolvedDependency, 0));
 				}
 			}
 		}
 	}
 
-	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency) {
+	private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, int level) {
 		final String gavKey = createGavKey(resolvedDependency);
+		final StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < level; i++) {
+			sb.append(" ");
+		}
+		final String buffer = sb.toString();
 		if (visitedMap.containsKey(gavKey)) {
-			logger.info(gavKey + " already resolved getting from map.");
+			logger.info(buffer + gavKey + " already resolved getting from map.");
 			return visitedMap.get(gavKey);
 		} else {
 			final Gav gav = createGavFromDependencyNode(resolvedDependency);
-			logger.info(gavKey + " created.");
-			logger.info(gavKey + " start dependencies");
+			logger.info(buffer + gavKey + " created.");
+			logger.info(buffer + gavKey + " start dependencies");
 			final List<DependencyNode> children = new ArrayList<>();
 			final DependencyNode dependencyNode = new DependencyNode(gav, children);
-			logger.info(gavKey + " children: " + resolvedDependency.getChildren().size());
 			for (final ResolvedDependency child : resolvedDependency.getChildren()) {
-				logger.info(gavKey + " resolving child dependencies");
-				children.add(createCommonDependencyNode(child));
+				children.add(createCommonDependencyNode(child, level++));
 			}
-			logger.info(gavKey + " finished dependencies");
+			logger.info(buffer + gavKey + " finished dependencies");
 			visitedMap.put(gavKey, dependencyNode);
 			return dependencyNode;
 		}
