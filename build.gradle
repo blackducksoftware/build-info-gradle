@@ -122,3 +122,9 @@ signing {
 	required { gradle.taskGraph.hasTask("uploadArchives") }
 	sign configurations.archives
 }
+
+sonarqube{
+	properties{
+		property 'sonar.projectName', 'Black Duck Hub Plugin for Gradle'
+	}
+}
