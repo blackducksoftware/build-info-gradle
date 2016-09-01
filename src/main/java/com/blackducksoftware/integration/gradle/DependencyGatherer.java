@@ -63,7 +63,6 @@ public class DependencyGatherer {
 	private String getArtifactId() {
 		if (rootProject.hasProperty(PROPERTY_HUB_PROJECT_NAME)) {
 			return rootProject.getProperties().get(PROPERTY_HUB_PROJECT_NAME).toString();
-
 		} else {
 			return rootProject.getName();
 		}
