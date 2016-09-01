@@ -44,25 +44,44 @@ import com.blackducksoftware.integration.build.bdio.DependencyNode;
 import com.blackducksoftware.integration.build.bdio.Gav;
 
 public class DependencyGatherer {
+	public final static String PROPERTY_HUB_PROJECT_NAME = "hubProjectName";
+	public final static String PROPERTY_HUB_PROJECT_VERSION = "hubProjectVersion";
 	private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
 
 	private final PluginHelper pluginHelper;
 	private final Project rootProject;
 	private final File output;
-
-	private final Map<String, DependencyNode> visitedMap = new HashMap<>();
+	final Map<String, DependencyNode> visitedMap = new HashMap<>();
 
 	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output) {
 		this.pluginHelper = pluginHelper;
 		this.rootProject = project;
 		this.output = output;
+
+	}
+
+	private String getArtifactId() {
+		if (rootProject.hasProperty(PROPERTY_HUB_PROJECT_NAME)) {
+			return rootProject.getProperties().get(PROPERTY_HUB_PROJECT_NAME).toString();
+
+		} else {
+			return rootProject.getName();
+		}
+	}
+
+	private String getVersion() {
+		if (rootProject.hasProperty(PROPERTY_HUB_PROJECT_VERSION)) {
+			return rootProject.getProperties().get(PROPERTY_HUB_PROJECT_VERSION).toString();
+		} else {
+			return rootProject.getVersion().toString();
+		}
 	}
 
 	public void handleBdioOutput() throws IOException {
 		logger.info("creating bdio output");
 		final String groupId = rootProject.getGroup().toString();
-		final String artifactId = rootProject.getName();
-		final String version = rootProject.getVersion().toString();
+		final String artifactId = getArtifactId();
+		final String version = getVersion();
 		final Gav projectGav = new Gav(groupId, artifactId, version);
 
 		final List<DependencyNode> children = new ArrayList<>();
