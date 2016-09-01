@@ -85,8 +85,13 @@ uploadArchives {
 			}
 		}
 	}
+}
 
-	println "Uploading ${rootProject.name} version ${version} to maven central."
+gradle.taskGraph.whenReady {
+	// only print uploading message if actually uploading to remotes
+	if (gradle.taskGraph.hasTask(":uploadArchives")) {
+		println "Uploading ${rootProject.name} version ${version} to maven central."
+	}
 }
 
 ext.jacocoVersion = System.properties['jacoco.version'] ?: '0.7.6.201602180812'
@@ -121,4 +126,10 @@ artifacts {
 signing {
 	required { gradle.taskGraph.hasTask("uploadArchives") }
 	sign configurations.archives
+}
+
+sonarqube{
+	properties{
+		property 'sonar.projectName', 'Black Duck Hub Plugin for Gradle'
+	}
 }
