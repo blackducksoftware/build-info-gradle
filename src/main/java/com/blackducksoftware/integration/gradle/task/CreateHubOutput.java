@@ -35,6 +35,8 @@ import com.blackducksoftware.integration.gradle.PluginHelper;
 public class CreateHubOutput extends DefaultTask {
 	private PluginHelper pluginHelper;
 	private String outputDirectory;
+	private String hubProjectName;
+	private String hubProjectVersion;
 
 	@TaskAction
 	public void gatherDependencies() throws IOException {
@@ -44,7 +46,8 @@ public class CreateHubOutput extends DefaultTask {
 			output = new File(outputDirectory);
 		}
 
-		final DependencyGatherer dependencyGatherer = new DependencyGatherer(pluginHelper, project, output);
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(pluginHelper, project, output,
+				hubProjectName, hubProjectVersion);
 		dependencyGatherer.handleBdioOutput();
 	}
 
@@ -64,4 +67,19 @@ public class CreateHubOutput extends DefaultTask {
 		this.outputDirectory = outputDirectory;
 	}
 
+	public String getHubProjectName() {
+		return hubProjectName;
+	}
+
+	public void setHubProjectName(final String hubProjectName) {
+		this.hubProjectName = hubProjectName;
+	}
+
+	public String getHubProjectVersion() {
+		return hubProjectVersion;
+	}
+
+	public void setHubProjectVersion(final String hubProjectVersion) {
+		this.hubProjectVersion = hubProjectVersion;
+	}
 }
