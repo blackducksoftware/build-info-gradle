@@ -21,10 +21,10 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,25 +65,8 @@ public class BuildInfoCustomTask extends DefaultTask {
 			// multiple projects
 			// so we add to the dependencies, instead of creating a new
 			// build-info.json
-			final StringBuilder buildInfoStringBuilder = new StringBuilder();
-			BufferedReader br = null;
-			try {
-				// We read the build-info.json file into a StringBuilder
-				br = new BufferedReader(new FileReader(file));
-				String line;
-				while ((line = br.readLine()) != null) {
-					buildInfoStringBuilder.append(line);
-				}
-			} finally {
-				if (br != null) {
-					br.close();
-				}
-			}
-
-			// We use the StringBuilder to make a single json String from the
-			// file contents
-			final String buildInfoString = buildInfoStringBuilder.toString();
-			if (buildInfoString != null && buildInfoString.trim().length() > 0) {
+			String buildInfoString = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+			if (buildInfoString.trim().length() > 0) {
 				// build-info.json is not an empty file
 				final Gson gson = new Gson();
 				// We use Gson to turn the json string into a BuildInfo object
@@ -92,9 +75,8 @@ public class BuildInfoCustomTask extends DefaultTask {
 		}
 		final String buildId = System.getProperty(PluginHelper.BUILD_ID_PROPERTY);
 		logger.info("BUILD ID : " + buildId);
-
-		BuildInfo buildInfo = null;
-		if (oldBuildInfo != null && oldBuildInfo.getBuildId().equals(buildId)) {
+		BuildInfo buildInfo;
+		if (oldBuildInfo != null && oldBuildInfo.getBuildId() != null && oldBuildInfo.getBuildId().equals(buildId)) {
 			// This must be a sub project in a multi-project gradle Build
 			logger.info("Will add to the build-info.json file");
 
