@@ -21,20 +21,17 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
+import com.blackducksoftware.integration.gradle.BdioHelper;
 import com.blackducksoftware.integration.gradle.HubBdioDeployer;
-import com.blackducksoftware.integration.gradle.PluginHelper;
 
 public class DeployHubOutput extends DefaultTask {
-	private PluginHelper pluginHelper;
-	private String outputDirectory;
+	private BdioHelper bdioHelper;
 	private String hubUrl;
 	private String hubUsername;
 	private String hubPassword;
@@ -47,32 +44,21 @@ public class DeployHubOutput extends DefaultTask {
 
 	@TaskAction
 	public void deployBdioFileToHub() throws IOException {
+		bdioHelper.ensureReportsDirectoryExists();
 		final Project project = getProject();
-		File output = pluginHelper.getBlackDuckDirectory();
-		if (StringUtils.isNotBlank(outputDirectory)) {
-			output = new File(outputDirectory);
-		}
 
-		final HubBdioDeployer hubBdioDeployer = new HubBdioDeployer(pluginHelper, project, output, hubUrl, hubUsername,
+		final HubBdioDeployer hubBdioDeployer = new HubBdioDeployer(bdioHelper, project, hubUrl, hubUsername,
 				hubPassword, hubTimeout, hubProxyHost, hubProxyPort, hubNoProxyHosts, hubProxyUsername,
 				hubProxyPassword);
 		hubBdioDeployer.deployToHub();
 	}
 
-	public PluginHelper getPluginHelper() {
-		return pluginHelper;
+	public BdioHelper getBdioHelper() {
+		return bdioHelper;
 	}
 
-	public void setPluginHelper(final PluginHelper pluginHelper) {
-		this.pluginHelper = pluginHelper;
-	}
-
-	public String getOutputDirectory() {
-		return outputDirectory;
-	}
-
-	public void setOutputDirectory(final String outputDirectory) {
-		this.outputDirectory = outputDirectory;
+	public void setBdioHelper(final BdioHelper bdioHelper) {
+		this.bdioHelper = bdioHelper;
 	}
 
 	public String getHubUrl() {

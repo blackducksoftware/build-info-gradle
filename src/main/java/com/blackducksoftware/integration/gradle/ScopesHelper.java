@@ -31,6 +31,8 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 
 public class ScopesHelper {
+	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
+
 	private final Project project;
 	private Set<String> allAvailableScopes;
 	private Set<String> requestedScopes;
@@ -84,9 +86,9 @@ public class ScopesHelper {
 	}
 
 	private void populateRequestedScopes() {
-		final String requestedScopesString = System.getProperty(PluginHelper.INCLUDED_CONFIGURATIONS_PROPERTY);
+		final String requestedScopesString = System.getProperty(INCLUDED_CONFIGURATIONS_PROPERTY);
 		if (requestedScopesString != null && requestedScopesString.trim().length() > 0) {
-			requestedScopes = new HashSet<String>();
+			requestedScopes = new HashSet<>();
 			if (requestedScopesString.contains(",")) {
 				final String[] pieces = requestedScopesString.split(",");
 				for (final String piece : pieces) {

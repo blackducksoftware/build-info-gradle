@@ -49,18 +49,16 @@ public class DependencyGatherer {
 	public final static String PROPERTY_HUB_PROJECT_VERSION = "hubProjectVersion";
 	private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
 
-	private final PluginHelper pluginHelper;
+	private final BdioHelper bdioHelper;
 	private final Project rootProject;
-	private final File output;
 	final Map<String, DependencyNode> visitedMap = new HashMap<>();
 	private final String hubProjectName;
 	private final String hubProjectVersion;
 
-	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output,
-			final String hubProjectName, final String hubProjectVersion) {
-		this.pluginHelper = pluginHelper;
+	public DependencyGatherer(final BdioHelper bdioHelper, final Project project, final String hubProjectName,
+			final String hubProjectVersion) {
+		this.bdioHelper = bdioHelper;
 		this.rootProject = project;
-		this.output = output;
 		this.hubProjectName = hubProjectName;
 		this.hubProjectVersion = hubProjectVersion;
 
@@ -96,7 +94,7 @@ public class DependencyGatherer {
 			getProjectDependencies(childProject, children);
 		}
 		logger.info("creating bdio file");
-		final File file = pluginHelper.getBdioFile(output, artifactId);
+		final File file = bdioHelper.getBdioFile(rootProject);
 		try (final OutputStream outputStream = new FileOutputStream(file)) {
 			final BdioConverter bdioConverter = new BdioConverter();
 			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);

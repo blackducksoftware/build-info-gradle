@@ -21,50 +21,36 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
+import com.blackducksoftware.integration.gradle.BdioHelper;
 import com.blackducksoftware.integration.gradle.DependencyGatherer;
-import com.blackducksoftware.integration.gradle.PluginHelper;
 
 public class CreateHubOutput extends DefaultTask {
-	private PluginHelper pluginHelper;
-	private String outputDirectory;
+	private BdioHelper bdioHelper;
 	private String hubProjectName;
 	private String hubProjectVersion;
 
 	@TaskAction
 	public void gatherDependencies() throws IOException {
+		bdioHelper.ensureReportsDirectoryExists();
 		final Project project = getProject();
-		File output = pluginHelper.getBlackDuckDirectory();
-		if (StringUtils.isNotBlank(outputDirectory)) {
-			output = new File(outputDirectory);
-		}
 
-		final DependencyGatherer dependencyGatherer = new DependencyGatherer(pluginHelper, project, output,
-				hubProjectName, hubProjectVersion);
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(bdioHelper, project, hubProjectName,
+				hubProjectVersion);
 		dependencyGatherer.handleBdioOutput();
 	}
 
-	public PluginHelper getPluginHelper() {
-		return pluginHelper;
+	public BdioHelper getBdioHelper() {
+		return bdioHelper;
 	}
 
-	public void setPluginHelper(final PluginHelper pluginHelper) {
-		this.pluginHelper = pluginHelper;
-	}
-
-	public String getOutputDirectory() {
-		return outputDirectory;
-	}
-
-	public void setOutputDirectory(final String outputDirectory) {
-		this.outputDirectory = outputDirectory;
+	public void setBdioHelper(final BdioHelper bdioHelper) {
+		this.bdioHelper = bdioHelper;
 	}
 
 	public String getHubProjectName() {
@@ -82,4 +68,5 @@ public class CreateHubOutput extends DefaultTask {
 	public void setHubProjectVersion(final String hubProjectVersion) {
 		this.hubProjectVersion = hubProjectVersion;
 	}
+
 }

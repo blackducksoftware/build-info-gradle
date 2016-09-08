@@ -26,7 +26,6 @@ import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.gradle.task.BuildInfoCustomTask;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutput;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutput;
 
@@ -39,51 +38,35 @@ public class HubGradlePlugin implements Plugin<Project> {
 			return;
 		}
 
-		final PluginHelper pluginHelper = new PluginHelper(project);
-
-		if (null == project.getTasks().findByName("buildInfoCustomTask")) {
-			createBuildInfoCustomTask(project, pluginHelper);
-		}
+		final BdioHelper bdioHelper = new BdioHelper(project);
 
 		if (null == project.getTasks().findByName("createHubOutput")) {
-			createCreateHubOutputTask(project, pluginHelper);
+			createCreateHubOutputTask(project, bdioHelper);
 		}
 
 		if (null == project.getTasks().findByName("deployHubOutput")) {
-			createDeployHubOutputTask(project, pluginHelper);
+			createDeployHubOutputTask(project, bdioHelper);
 		}
 	}
 
-	private void createBuildInfoCustomTask(final Project project, final PluginHelper pluginHelper) {
-		logger.info(String.format("Configuring buildInfoCustomTask task for project path: %s", project.getPath()));
-
-		final BuildInfoCustomTask buildInfoCustomTask = project.getTasks().create("buildInfoCustomTask",
-				BuildInfoCustomTask.class);
-		buildInfoCustomTask.setDescription("Generate build-info file, using project configurations.");
-		buildInfoCustomTask.setGroup("reporting");
-		buildInfoCustomTask.setPluginHelper(pluginHelper);
-
-		logger.info("Successfully configured buildInfoCustomTask");
-	}
-
-	private void createCreateHubOutputTask(final Project project, final PluginHelper pluginHelper) {
+	private void createCreateHubOutputTask(final Project project, final BdioHelper bdioHelper) {
 		logger.info(String.format("Configuring createHubOutput task for project path: %s", project.getPath()));
 
 		final CreateHubOutput createHubOutputTask = project.getTasks().create("createHubOutput", CreateHubOutput.class);
 		createHubOutputTask.setDescription("Generate the bdio file.");
 		createHubOutputTask.setGroup("reporting");
-		createHubOutputTask.setPluginHelper(pluginHelper);
+		createHubOutputTask.setBdioHelper(bdioHelper);
 
 		logger.info("Successfully configured createHubOutput");
 	}
 
-	private void createDeployHubOutputTask(final Project project, final PluginHelper pluginHelper) {
+	private void createDeployHubOutputTask(final Project project, final BdioHelper bdioHelper) {
 		logger.info(String.format("Configuring deployHubOutput task for project path: %s", project.getPath()));
 
 		final DeployHubOutput deployHubOutputTask = project.getTasks().create("deployHubOutput", DeployHubOutput.class);
 		deployHubOutputTask.setDescription("Deploy the bdio file to the specified Hub server.");
 		deployHubOutputTask.setGroup("reporting");
-		deployHubOutputTask.setPluginHelper(pluginHelper);
+		deployHubOutputTask.setBdioHelper(bdioHelper);
 
 		logger.info("Successfully configured deployHubOutput");
 	}
