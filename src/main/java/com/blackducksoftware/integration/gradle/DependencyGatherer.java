@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedConfiguration;
@@ -52,25 +53,30 @@ public class DependencyGatherer {
 	private final Project rootProject;
 	private final File output;
 	final Map<String, DependencyNode> visitedMap = new HashMap<>();
+	private final String hubProjectName;
+	private final String hubProjectVersion;
 
-	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output) {
+	public DependencyGatherer(final PluginHelper pluginHelper, final Project project, final File output,
+			final String hubProjectName, final String hubProjectVersion) {
 		this.pluginHelper = pluginHelper;
 		this.rootProject = project;
 		this.output = output;
+		this.hubProjectName = hubProjectName;
+		this.hubProjectVersion = hubProjectVersion;
 
 	}
 
 	private String getArtifactId() {
-		if (rootProject.hasProperty(PROPERTY_HUB_PROJECT_NAME)) {
-			return rootProject.getProperties().get(PROPERTY_HUB_PROJECT_NAME).toString();
+		if (StringUtils.isNotBlank(hubProjectName)) {
+			return hubProjectName;
 		} else {
 			return rootProject.getName();
 		}
 	}
 
 	private String getVersion() {
-		if (rootProject.hasProperty(PROPERTY_HUB_PROJECT_VERSION)) {
-			return rootProject.getProperties().get(PROPERTY_HUB_PROJECT_VERSION).toString();
+		if (StringUtils.isNotBlank(hubProjectVersion)) {
+			return hubProjectVersion;
 		} else {
 			return rootProject.getVersion().toString();
 		}
@@ -94,7 +100,7 @@ public class DependencyGatherer {
 		try (final OutputStream outputStream = new FileOutputStream(file)) {
 			final BdioConverter bdioConverter = new BdioConverter();
 			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
-			commonBomFormatter.writeProject(outputStream, rootProject.getName(), root);
+			commonBomFormatter.writeProject(outputStream, artifactId, root);
 		}
 
 		logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
