@@ -23,6 +23,6 @@ dependencies {
 	compile "org.restlet.jse:org.restlet:$restletVersion"
 	compile "org.restlet.jse:org.restlet.ext.json:$restletVersion"
 
-	compile 'org.apache.commons:commons-lang3:3.1'
+	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'com.google.code.gson:gson:2.7'
 }
