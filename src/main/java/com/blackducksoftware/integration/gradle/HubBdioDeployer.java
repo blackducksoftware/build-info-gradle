@@ -51,9 +51,8 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 public class HubBdioDeployer {
 	private final Logger logger = LoggerFactory.getLogger(HubBdioDeployer.class);
 
-	private final PluginHelper pluginHelper;
+	private final BdioHelper bdioHelper;
 	private final Project project;
-	private final File output;
 	private final String hubUrl;
 	private final String hubUsername;
 	private final String hubPassword;
@@ -64,13 +63,12 @@ public class HubBdioDeployer {
 	private final String hubProxyUsername;
 	private final String hubProxyPassword;
 
-	public HubBdioDeployer(final PluginHelper pluginHelper, final Project project, final File output,
-			final String hubUrl, final String hubUsername, final String hubPassword, final String hubTimeout,
-			final String hubProxyHost, final String hubProxyPort, final String hubNoProxyHosts,
-			final String hubProxyUsername, final String hubProxyPassword) {
-		this.pluginHelper = pluginHelper;
+	public HubBdioDeployer(final BdioHelper bdioHelper, final Project project, final String hubUrl,
+			final String hubUsername, final String hubPassword, final String hubTimeout, final String hubProxyHost,
+			final String hubProxyPort, final String hubNoProxyHosts, final String hubProxyUsername,
+			final String hubProxyPassword) {
+		this.bdioHelper = bdioHelper;
 		this.project = project;
-		this.output = output;
 		this.hubUrl = hubUrl;
 		this.hubUsername = hubUsername;
 		this.hubPassword = hubPassword;
@@ -84,7 +82,7 @@ public class HubBdioDeployer {
 
 	public void deployToHub() {
 		logger.info("Deploying Black Duck I/O output");
-		final File file = pluginHelper.getBdioFile(output, project.getName());
+		final File file = bdioHelper.getBdioFile(project);
 
 		final HubServerConfigBuilder builder = new HubServerConfigBuilder();
 		builder.setHubUrl(hubUrl);

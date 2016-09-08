@@ -30,7 +30,7 @@ import org.gradle.api.Task;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.gradle.task.BuildInfoCustomTask;
+import com.blackducksoftware.integration.gradle.task.CreateHubOutput;
 
 public class HubGradlePluginTest {
 	@Test
@@ -42,9 +42,9 @@ public class HubGradlePluginTest {
 
 		assertTrue(project.getPlugins().hasPlugin(HubGradlePlugin.class));
 
-		final Task task = project.getTasks().getByName("buildInfoCustomTask");
+		final Task task = project.getTasks().getByName("createHubOutput");
 		assertNotNull(task);
-		assertTrue(task instanceof BuildInfoCustomTask);
+		assertTrue(task instanceof CreateHubOutput);
 	}
 
 }
