@@ -13,6 +13,14 @@ public class BdioHelper {
 	public BdioHelper(final Project project) {
 		this.project = project;
 	}
+	
+	public void setBlackDuckReports(File blackDuckReports){
+		this.blackDuckReports = blackDuckReports;
+	}
+	
+	public File getBlackDuckReports(){
+		return this.blackDuckReports;
+	}
 
 	public boolean ensureReportsDirectoryExists() {
 		File reportsDirectory;

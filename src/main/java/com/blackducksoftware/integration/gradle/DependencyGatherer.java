@@ -94,6 +94,7 @@ public class DependencyGatherer {
 			getProjectDependencies(childProject, children);
 		}
 		logger.info("creating bdio file");
+		bdioHelper.setBlackDuckReports(new File(rootProject.getBuildDir(), "blackduck"));
 		final File file = bdioHelper.getBdioFile(rootProject);
 		try (final OutputStream outputStream = new FileOutputStream(file)) {
 			final BdioConverter bdioConverter = new BdioConverter();
