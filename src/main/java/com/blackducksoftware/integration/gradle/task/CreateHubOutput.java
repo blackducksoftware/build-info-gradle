@@ -43,7 +43,7 @@ public class CreateHubOutput extends DefaultTask {
 
 		final DependencyGatherer dependencyGatherer = new DependencyGatherer(taskHelper, project, hubProjectName,
 				hubProjectVersion);
-		dependencyGatherer.handleBdioOutput();
+		dependencyGatherer.createBdioOutput();
 	}
 
 }

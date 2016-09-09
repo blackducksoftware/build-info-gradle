@@ -47,6 +47,7 @@ import com.blackducksoftware.integration.build.bdio.Gav;
 public class DependencyGatherer {
 	public final static String PROPERTY_HUB_PROJECT_NAME = "hubProjectName";
 	public final static String PROPERTY_HUB_PROJECT_VERSION = "hubProjectVersion";
+
 	private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
 
 	private final TaskHelper taskHelper;
@@ -55,13 +56,19 @@ public class DependencyGatherer {
 	private final String hubProjectName;
 	private final String hubProjectVersion;
 
+	public DependencyGatherer(final TaskHelper taskHelper, final Project project) {
+		this.taskHelper = taskHelper;
+		this.rootProject = project;
+		this.hubProjectName = null;
+		this.hubProjectVersion = null;
+	}
+
 	public DependencyGatherer(final TaskHelper taskHelper, final Project project, final String hubProjectName,
 			final String hubProjectVersion) {
 		this.taskHelper = taskHelper;
 		this.rootProject = project;
 		this.hubProjectName = hubProjectName;
 		this.hubProjectVersion = hubProjectVersion;
-
 	}
 
 	private String getArtifactId() {
@@ -80,8 +87,33 @@ public class DependencyGatherer {
 		}
 	}
 
-	public void handleBdioOutput() throws IOException {
+	public void createFlatOutput() throws IOException {
+		final DependencyNode root = getFullyPopulatedRootNode();
+		logger.info("creating flat output");
+		final File file = taskHelper.getFlatFile(rootProject);
+		try (final OutputStream outputStream = new FileOutputStream(file)) {
+			final FlatDependencyListWriter writer = new FlatDependencyListWriter(taskHelper);
+			writer.write(outputStream, root);
+		}
+
+		logger.info("Created flattened dependencies: " + file.getAbsolutePath());
+	}
+
+	public void createBdioOutput() throws IOException {
+		final DependencyNode root = getFullyPopulatedRootNode();
 		logger.info("creating bdio output");
+		final File file = taskHelper.getBdioFile(rootProject);
+		try (final OutputStream outputStream = new FileOutputStream(file)) {
+			final BdioConverter bdioConverter = new BdioConverter();
+			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
+			commonBomFormatter.writeProject(outputStream, getArtifactId(), root);
+		}
+
+		logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
+	}
+
+	private DependencyNode getFullyPopulatedRootNode() {
+		logger.info("creating the dependency graph");
 		final String groupId = rootProject.getGroup().toString();
 		final String artifactId = getArtifactId();
 		final String version = getVersion();
@@ -89,19 +121,11 @@ public class DependencyGatherer {
 
 		final List<DependencyNode> children = new ArrayList<>();
 		final DependencyNode root = new DependencyNode(projectGav, children);
-		logger.info("creating bdio graph");
 		for (final Project childProject : rootProject.getAllprojects()) {
 			getProjectDependencies(childProject, children);
 		}
-		logger.info("creating bdio file");
-		final File file = taskHelper.getBdioFile(rootProject);
-		try (final OutputStream outputStream = new FileOutputStream(file)) {
-			final BdioConverter bdioConverter = new BdioConverter();
-			final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
-			commonBomFormatter.writeProject(outputStream, artifactId, root);
-		}
 
-		logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
+		return root;
 	}
 
 	private void getProjectDependencies(final Project project, final List<DependencyNode> children) {
