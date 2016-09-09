@@ -48,6 +48,10 @@ public class HubGradlePlugin implements Plugin<Project> {
 		if (null == project.getTasks().findByName("deployHubOutput")) {
 			createDeployHubOutputTask(project, taskHelper);
 		}
+
+		if (null == project.getTasks().findByName("createFlatDependencyList")) {
+			createFlatDependencyListTask(project, taskHelper);
+		}
 	}
 
 	private void createCreateHubOutputTask(final Project project, final TaskHelper taskHelper) {
