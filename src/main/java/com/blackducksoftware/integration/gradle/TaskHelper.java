@@ -2,28 +2,34 @@ package com.blackducksoftware.integration.gradle;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 
 import com.blackducksoftware.integration.build.bdio.Constants;
 
-public class BdioHelper {
+public class TaskHelper {
 	private final Project project;
 	private File blackDuckReports;
 
-	public BdioHelper(final Project project) {
+	public TaskHelper(final Project project) {
 		this.project = project;
 	}
 
-	public boolean ensureReportsDirectoryExists() {
-		File reportsDirectory;
-		if (project.getRootProject() != null) {
-			final Project rootProject = project.getRootProject();
-			reportsDirectory = new File(rootProject.getBuildDir(), "reports");
+	public boolean ensureReportsDirectoryExists(final String userSpecifiedDirectory) {
+		if (StringUtils.isNotBlank(userSpecifiedDirectory)) {
+			blackDuckReports = new File(userSpecifiedDirectory);
 		} else {
-			reportsDirectory = new File(project.getBuildDir(), "reports");
+			File reportsDirectory;
+			if (project.getRootProject() != null) {
+				final Project rootProject = project.getRootProject();
+				reportsDirectory = new File(rootProject.getBuildDir(), "reports");
+			} else {
+				reportsDirectory = new File(project.getBuildDir(), "reports");
+			}
+
+			blackDuckReports = new File(reportsDirectory, "blackduck");
 		}
 
-		final File blackDuckReports = new File(reportsDirectory, "blackduck");
 		return blackDuckReports.mkdirs();
 	}
 

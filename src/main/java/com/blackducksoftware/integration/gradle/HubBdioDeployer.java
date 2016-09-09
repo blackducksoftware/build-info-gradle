@@ -51,7 +51,7 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 public class HubBdioDeployer {
 	private final Logger logger = LoggerFactory.getLogger(HubBdioDeployer.class);
 
-	private final BdioHelper bdioHelper;
+	private final TaskHelper taskHelper;
 	private final Project project;
 	private final String hubUrl;
 	private final String hubUsername;
@@ -63,11 +63,11 @@ public class HubBdioDeployer {
 	private final String hubProxyUsername;
 	private final String hubProxyPassword;
 
-	public HubBdioDeployer(final BdioHelper bdioHelper, final Project project, final String hubUrl,
+	public HubBdioDeployer(final TaskHelper taskHelper, final Project project, final String hubUrl,
 			final String hubUsername, final String hubPassword, final String hubTimeout, final String hubProxyHost,
 			final String hubProxyPort, final String hubNoProxyHosts, final String hubProxyUsername,
 			final String hubProxyPassword) {
-		this.bdioHelper = bdioHelper;
+		this.taskHelper = taskHelper;
 		this.project = project;
 		this.hubUrl = hubUrl;
 		this.hubUsername = hubUsername;
@@ -82,7 +82,7 @@ public class HubBdioDeployer {
 
 	public void deployToHub() {
 		logger.info("Deploying Black Duck I/O output");
-		final File file = bdioHelper.getBdioFile(project);
+		final File file = taskHelper.getBdioFile(project);
 
 		final HubServerConfigBuilder builder = new HubServerConfigBuilder();
 		builder.setHubUrl(hubUrl);
