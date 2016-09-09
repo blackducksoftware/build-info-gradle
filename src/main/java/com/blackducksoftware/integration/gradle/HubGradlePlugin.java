@@ -26,6 +26,7 @@ import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.gradle.task.CreateFlatDependencyList;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutput;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutput;
 
@@ -38,37 +39,49 @@ public class HubGradlePlugin implements Plugin<Project> {
 			return;
 		}
 
-		final BdioHelper bdioHelper = new BdioHelper(project);
+		final TaskHelper taskHelper = new TaskHelper(project);
 
 		if (null == project.getTasks().findByName("createHubOutput")) {
-			createCreateHubOutputTask(project, bdioHelper);
+			createCreateHubOutputTask(project, taskHelper);
 		}
 
 		if (null == project.getTasks().findByName("deployHubOutput")) {
-			createDeployHubOutputTask(project, bdioHelper);
+			createDeployHubOutputTask(project, taskHelper);
 		}
 	}
 
-	private void createCreateHubOutputTask(final Project project, final BdioHelper bdioHelper) {
+	private void createCreateHubOutputTask(final Project project, final TaskHelper taskHelper) {
 		logger.info(String.format("Configuring createHubOutput task for project path: %s", project.getPath()));
 
 		final CreateHubOutput createHubOutputTask = project.getTasks().create("createHubOutput", CreateHubOutput.class);
 		createHubOutputTask.setDescription("Generate the bdio file.");
 		createHubOutputTask.setGroup("reporting");
-		createHubOutputTask.setBdioHelper(bdioHelper);
+		createHubOutputTask.taskHelper = taskHelper;
 
 		logger.info("Successfully configured createHubOutput");
 	}
 
-	private void createDeployHubOutputTask(final Project project, final BdioHelper bdioHelper) {
+	private void createDeployHubOutputTask(final Project project, final TaskHelper taskHelper) {
 		logger.info(String.format("Configuring deployHubOutput task for project path: %s", project.getPath()));
 
 		final DeployHubOutput deployHubOutputTask = project.getTasks().create("deployHubOutput", DeployHubOutput.class);
 		deployHubOutputTask.setDescription("Deploy the bdio file to the specified Hub server.");
 		deployHubOutputTask.setGroup("reporting");
-		deployHubOutputTask.setBdioHelper(bdioHelper);
+		deployHubOutputTask.taskHelper = taskHelper;
 
 		logger.info("Successfully configured deployHubOutput");
+	}
+
+	private void createFlatDependencyListTask(final Project project, final TaskHelper taskHelper) {
+		logger.info(String.format("Configuring createHubOutput task for project path: %s", project.getPath()));
+
+		final CreateFlatDependencyList createFlatDependencyListTask = project.getTasks()
+				.create("createFlatDependencyList", CreateFlatDependencyList.class);
+		createFlatDependencyListTask.setDescription("Generate a flat list of unique dependencies.");
+		createFlatDependencyListTask.setGroup("reporting");
+		createFlatDependencyListTask.taskHelper = taskHelper;
+
+		logger.info("Successfully configured createHubOutput");
 	}
 
 }

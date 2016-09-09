@@ -27,46 +27,23 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
-import com.blackducksoftware.integration.gradle.BdioHelper;
 import com.blackducksoftware.integration.gradle.DependencyGatherer;
+import com.blackducksoftware.integration.gradle.TaskHelper;
 
 public class CreateHubOutput extends DefaultTask {
-	private BdioHelper bdioHelper;
-	private String hubProjectName;
-	private String hubProjectVersion;
+	public TaskHelper taskHelper;
+	public String hubProjectName;
+	public String hubProjectVersion;
+	public String outputDirectory;
 
 	@TaskAction
 	public void gatherDependencies() throws IOException {
-		bdioHelper.ensureReportsDirectoryExists();
+		taskHelper.ensureReportsDirectoryExists(outputDirectory);
 		final Project project = getProject();
 
-		final DependencyGatherer dependencyGatherer = new DependencyGatherer(bdioHelper, project, hubProjectName,
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(taskHelper, project, hubProjectName,
 				hubProjectVersion);
 		dependencyGatherer.handleBdioOutput();
-	}
-
-	public BdioHelper getBdioHelper() {
-		return bdioHelper;
-	}
-
-	public void setBdioHelper(final BdioHelper bdioHelper) {
-		this.bdioHelper = bdioHelper;
-	}
-
-	public String getHubProjectName() {
-		return hubProjectName;
-	}
-
-	public void setHubProjectName(final String hubProjectName) {
-		this.hubProjectName = hubProjectName;
-	}
-
-	public String getHubProjectVersion() {
-		return hubProjectVersion;
-	}
-
-	public void setHubProjectVersion(final String hubProjectVersion) {
-		this.hubProjectVersion = hubProjectVersion;
 	}
 
 }
