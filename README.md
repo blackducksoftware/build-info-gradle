@@ -5,7 +5,7 @@ Tasks:
 
 * createHubOutput - generates the [Black Duck I/O](https://github.com/blackducksoftware/bdio) file
 * deployHubOutput - uploads the file to the hub server
-* buildInfoCustomTask - generates a file in a deprecated format for your build dependencies
+* createFlatDependencyList - generates a file listing your build dependencies with duplicates removed
 
 ## Build ##
 [![Build Status](https://travis-ci.org/blackducksoftware/hub-gradle-plugin.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-gradle-plugin)

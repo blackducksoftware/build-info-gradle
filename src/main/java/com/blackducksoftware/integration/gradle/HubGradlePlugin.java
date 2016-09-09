@@ -85,7 +85,7 @@ public class HubGradlePlugin implements Plugin<Project> {
 		createFlatDependencyListTask.setGroup("reporting");
 		createFlatDependencyListTask.taskHelper = taskHelper;
 
-		logger.info("Successfully configured createHubOutput");
+		logger.info("Successfully configured createFlatDependencyList");
 	}
 
 }
