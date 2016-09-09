@@ -24,7 +24,7 @@ repositories {
 }
 
 group='com.blackducksoftware.integration'
-version='2.0.12'
+version='2.0.13-SNAPSHOT'
 description='Black Duck Hub Gradle Plugin'
 
 dependencies {
