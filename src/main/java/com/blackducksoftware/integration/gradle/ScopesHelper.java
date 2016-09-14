@@ -101,7 +101,7 @@ public class ScopesHelper {
 	}
 
 	private void populateShouldIncludeScopeMap() {
-		if (null != requestedScopes) {
+		if (requestedScopes != null) {
 			for (final String scope : requestedScopes) {
 				shouldIncludeScopeMap.put(scope.trim().toUpperCase(), Boolean.TRUE);
 			}

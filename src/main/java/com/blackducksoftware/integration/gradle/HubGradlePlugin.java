@@ -41,15 +41,15 @@ public class HubGradlePlugin implements Plugin<Project> {
 
 		final TaskHelper taskHelper = new TaskHelper(project);
 
-		if (null == project.getTasks().findByName("createHubOutput")) {
+		if (project.getTasks().findByName("createHubOutput") == null) {
 			createCreateHubOutputTask(project, taskHelper);
 		}
 
-		if (null == project.getTasks().findByName("deployHubOutput")) {
+		if (project.getTasks().findByName("deployHubOutput") == null) {
 			createDeployHubOutputTask(project, taskHelper);
 		}
 
-		if (null == project.getTasks().findByName("createFlatDependencyList")) {
+		if (project.getTasks().findByName("createFlatDependencyList") == null) {
 			createFlatDependencyListTask(project, taskHelper);
 		}
 	}
