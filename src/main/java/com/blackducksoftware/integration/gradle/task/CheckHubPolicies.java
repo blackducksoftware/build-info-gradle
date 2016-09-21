@@ -16,14 +16,18 @@ import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
 import com.blackducksoftware.integration.hub.builder.ValidationResults;
+import com.blackducksoftware.integration.hub.dataservices.scan.ScanStatusDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
+import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.logging.Slf4jIntLogger;
-import com.blackducksoftware.integration.hub.polling.ScanStatusService;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 public class CheckHubPolicies extends DefaultTask {
 	private final Logger logger = LoggerFactory.getLogger(CheckHubPolicies.class);
@@ -57,11 +61,20 @@ public class CheckHubPolicies extends DefaultTask {
 
 		final ValidationResults<GlobalFieldKey, HubServerConfig> results = builder.build();
 		if (results.isSuccess()) {
-			final HubServerConfig config = results.getConstructedObject();
+			final HubServerConfig hubServerConfig = results.getConstructedObject();
 			try {
+				final RestConnection restConnection = new RestConnection(hubServerConfig.getHubUrl().toString());
+				final HubProxyInfo proxyInfo = hubServerConfig.getProxyInfo();
+				if (proxyInfo.shouldUseProxyForUrl(hubServerConfig.getHubUrl())) {
+					restConnection.setProxyProperties(proxyInfo);
+				}
+
+				restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
+						hubServerConfig.getGlobalCredentials().getDecryptedPassword());
 				final long scanStartedTimeout = NumberUtils.toLong(hubScanStartedTimeout);
 				final long scanFinishedTimeout = NumberUtils.toLong(hubScanFinishedTimeout);
-				final ScanStatusService scanStatusService = new ScanStatusService(config, new Slf4jIntLogger(logger));
+				final ScanStatusDataService scanStatusService = new ScanStatusDataService(restConnection, new Gson(),
+						new JsonParser(), new Slf4jIntLogger(logger));
 				final PolicyStatusItem policyStatusItem = scanStatusService.checkPolicies(
 						getProject().getGroup().toString(), hubProjectName, hubProjectVersion, scanStartedTimeout,
 						scanFinishedTimeout);
