@@ -131,7 +131,7 @@ public class HubBdioDeployer {
 		urlSegments.add("bom-import");
 		final Set<SimpleEntry<String, String>> queryParameters = new HashSet<>();
 		final FileRepresentation content = new FileRepresentation(file, new MediaType(Constants.BDIO_FILE_MEDIA_TYPE));
-		final String location = connection.httpPostFromRelativeUrl(urlSegments, queryParameters, content);
+		connection.httpPostFromRelativeUrl(urlSegments, queryParameters, content);
 
 		logger.info("Uploaded the file: " + file + " to " + config.getHubUrl().toString());
 	}

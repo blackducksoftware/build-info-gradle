@@ -26,6 +26,7 @@ import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.gradle.task.CheckHubPolicies;
 import com.blackducksoftware.integration.gradle.task.CreateFlatDependencyList;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutput;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutput;
@@ -51,6 +52,10 @@ public class HubGradlePlugin implements Plugin<Project> {
 
 		if (project.getTasks().findByName("createFlatDependencyList") == null) {
 			createFlatDependencyListTask(project, taskHelper);
+		}
+
+		if (project.getTasks().findByName("checkHubPolicies") == null) {
+			createCheckHubPoliciesTask(project, taskHelper);
 		}
 	}
 
@@ -86,6 +91,17 @@ public class HubGradlePlugin implements Plugin<Project> {
 		createFlatDependencyListTask.taskHelper = taskHelper;
 
 		logger.info("Successfully configured createFlatDependencyList");
+	}
+
+	private void createCheckHubPoliciesTask(final Project project, final TaskHelper taskHelper) {
+		logger.info(String.format("Configuring checkHubPolicies task for project path: %s", project.getPath()));
+
+		final CheckHubPolicies checkHubPoliciesTask = project.getTasks().create("checkHubPolicies",
+				CheckHubPolicies.class);
+		checkHubPoliciesTask.setDescription("Check the project's policies on the Hub.");
+		checkHubPoliciesTask.setGroup("reporting");
+
+		logger.info("Successfully configured checkHubPolicies");
 	}
 
 }
