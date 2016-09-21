@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
@@ -34,8 +33,8 @@ public class CheckHubPolicies extends DefaultTask {
 
 	public String hubProjectName;
 	public String hubProjectVersion;
-	public String hubScanStartedTimeout;
-	public String hubScanFinishedTimeout;
+	public long hubScanStartedTimeout;
+	public long hubScanFinishedTimeout;
 	public String hubUrl;
 	public String hubUsername;
 	public String hubPassword;
@@ -71,8 +70,8 @@ public class CheckHubPolicies extends DefaultTask {
 
 				restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
 						hubServerConfig.getGlobalCredentials().getDecryptedPassword());
-				final long scanStartedTimeout = NumberUtils.toLong(hubScanStartedTimeout);
-				final long scanFinishedTimeout = NumberUtils.toLong(hubScanFinishedTimeout);
+				final long scanStartedTimeout = hubScanStartedTimeout;
+				final long scanFinishedTimeout = hubScanFinishedTimeout;
 				final ScanStatusDataService scanStatusService = new ScanStatusDataService(restConnection, new Gson(),
 						new JsonParser(), new Slf4jIntLogger(logger));
 				final PolicyStatusItem policyStatusItem = scanStatusService.checkPolicies(
