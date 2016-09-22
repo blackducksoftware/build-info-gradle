@@ -24,11 +24,10 @@ package com.blackducksoftware.integration.gradle.task;
 import java.io.IOException;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
-import com.blackducksoftware.integration.gradle.HubBdioDeployer;
 import com.blackducksoftware.integration.gradle.TaskHelper;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class DeployHubOutput extends DefaultTask {
 	public TaskHelper taskHelper;
@@ -46,12 +45,10 @@ public class DeployHubOutput extends DefaultTask {
 	@TaskAction
 	public void deployBdioFileToHub() throws IOException {
 		taskHelper.ensureReportsDirectoryExists(outputDirectory);
-		final Project project = getProject();
 
-		final HubBdioDeployer hubBdioDeployer = new HubBdioDeployer(taskHelper, project, hubUrl, hubUsername,
-				hubPassword, hubTimeout, hubProxyHost, hubProxyPort, hubNoProxyHosts, hubProxyUsername,
-				hubProxyPassword);
-		hubBdioDeployer.deployToHub();
+		final RestConnection restConnection = taskHelper.getRestConnectionToHub(hubUrl, hubUsername, hubPassword,
+				hubTimeout, hubProxyHost, hubProxyPort, hubNoProxyHosts, hubProxyUsername, hubProxyPassword);
+		taskHelper.deployToHub(restConnection);
 	}
 
 }

@@ -30,6 +30,7 @@ import com.blackducksoftware.integration.gradle.task.CheckHubPolicies;
 import com.blackducksoftware.integration.gradle.task.CreateFlatDependencyList;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutput;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutput;
+import com.blackducksoftware.integration.gradle.task.DeployHubOutputAndCheckPolicies;
 
 public class HubGradlePlugin implements Plugin<Project> {
 	private final Logger logger = LoggerFactory.getLogger(HubGradlePlugin.class);
@@ -42,6 +43,10 @@ public class HubGradlePlugin implements Plugin<Project> {
 
 		final TaskHelper taskHelper = new TaskHelper(project);
 
+		if (project.getTasks().findByName("createFlatDependencyList") == null) {
+			createFlatDependencyListTask(project, taskHelper);
+		}
+
 		if (project.getTasks().findByName("createHubOutput") == null) {
 			createCreateHubOutputTask(project, taskHelper);
 		}
@@ -50,12 +55,12 @@ public class HubGradlePlugin implements Plugin<Project> {
 			createDeployHubOutputTask(project, taskHelper);
 		}
 
-		if (project.getTasks().findByName("createFlatDependencyList") == null) {
-			createFlatDependencyListTask(project, taskHelper);
-		}
-
 		if (project.getTasks().findByName("checkHubPolicies") == null) {
 			createCheckHubPoliciesTask(project, taskHelper);
+		}
+
+		if (project.getTasks().findByName("deployAndCheckHubPolicies") == null) {
+			createDeployAndCheckHubPoliciesTask(project, taskHelper);
 		}
 	}
 
@@ -100,8 +105,23 @@ public class HubGradlePlugin implements Plugin<Project> {
 				CheckHubPolicies.class);
 		checkHubPoliciesTask.setDescription("Check the project's policies on the Hub.");
 		checkHubPoliciesTask.setGroup("reporting");
+		checkHubPoliciesTask.taskHelper = taskHelper;
 
 		logger.info("Successfully configured checkHubPolicies");
+	}
+
+	private void createDeployAndCheckHubPoliciesTask(final Project project, final TaskHelper taskHelper) {
+		logger.info(
+				String.format("Configuring deployAndCheckHubPolicies task for project path: %s", project.getPath()));
+
+		final DeployHubOutputAndCheckPolicies deployHubOutputAndCheckPolicies = project.getTasks()
+				.create("deployHubOutputAndCheckPolicies", DeployHubOutputAndCheckPolicies.class);
+		deployHubOutputAndCheckPolicies.setDescription(
+				"Deploy the bdio file and wait for completion, then check the project's policies on the Hub.");
+		deployHubOutputAndCheckPolicies.setGroup("reporting");
+		deployHubOutputAndCheckPolicies.taskHelper = taskHelper;
+
+		logger.info("Successfully configured deployHubOutputAndCheckPolicies");
 	}
 
 }
