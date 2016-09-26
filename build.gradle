@@ -31,7 +31,7 @@ dependencies {
 	compile gradleApi()
 	compile localGroovy()
 	compile 'com.blackducksoftware.integration:build-tool-common:2.0.8'
-	compile 'com.blackducksoftware.integration:hub-common:1.4.6-SNAPSHOT'
+	compile 'com.blackducksoftware.integration:hub-common:1.4.6'
 	compile 'commons-io:commons-io:2.5'
 	compile 'com.google.code.gson:gson:2.7'
 

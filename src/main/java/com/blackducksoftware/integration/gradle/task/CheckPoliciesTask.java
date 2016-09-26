@@ -6,7 +6,7 @@ import org.gradle.api.tasks.TaskAction;
 import com.blackducksoftware.integration.gradle.TaskHelper;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class CheckHubPolicies extends DefaultTask {
+public class CheckPoliciesTask extends DefaultTask {
 	public TaskHelper taskHelper;
 	public String hubProjectName;
 	public String hubProjectVersion;
@@ -21,9 +21,10 @@ public class CheckHubPolicies extends DefaultTask {
 	public String hubProxyPassword;
 
 	@TaskAction
-	public void checkHubPolicies() {
+	public void task() {
 		final RestConnection restConnection = taskHelper.getRestConnectionToHub(hubUrl, hubUsername, hubPassword,
 				hubTimeout, hubProxyHost, hubProxyPort, hubNoProxyHosts, hubProxyUsername, hubProxyPassword);
+
 		taskHelper.checkPolicies(restConnection, hubProjectName, hubProjectVersion);
 	}
 

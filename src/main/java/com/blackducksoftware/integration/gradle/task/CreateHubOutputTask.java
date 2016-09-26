@@ -27,28 +27,16 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 
 import com.blackducksoftware.integration.gradle.TaskHelper;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class DeployHubOutput extends DefaultTask {
+public class CreateHubOutputTask extends DefaultTask {
 	public TaskHelper taskHelper;
-	public String hubUrl;
-	public String hubUsername;
-	public String hubPassword;
-	public String hubTimeout;
-	public String hubProxyHost;
-	public String hubProxyPort;
-	public String hubNoProxyHosts;
-	public String hubProxyUsername;
-	public String hubProxyPassword;
+	public String hubProjectName;
+	public String hubProjectVersion;
 	public String outputDirectory;
 
 	@TaskAction
-	public void deployBdioFileToHub() throws IOException {
-		taskHelper.ensureReportsDirectoryExists(outputDirectory);
-
-		final RestConnection restConnection = taskHelper.getRestConnectionToHub(hubUrl, hubUsername, hubPassword,
-				hubTimeout, hubProxyHost, hubProxyPort, hubNoProxyHosts, hubProxyUsername, hubProxyPassword);
-		taskHelper.deployToHub(restConnection);
+	public void task() throws IOException {
+		taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
 	}
 
 }

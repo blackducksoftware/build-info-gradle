@@ -150,8 +150,26 @@ public class TaskHelper {
 		}
 	}
 
-	public void deployToHub(final RestConnection restConnection) {
+	public void createFlatDependencyList(final String outputDirectory) throws IOException {
+		ensureReportsDirectoryExists(outputDirectory);
+
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(this, project);
+		dependencyGatherer.createFlatOutput();
+	}
+
+	public void createHubOutput(final String hubProjectName, final String hubProjectVersion,
+			final String outputDirectory) throws IOException {
+		ensureReportsDirectoryExists(outputDirectory);
+
+		final DependencyGatherer dependencyGatherer = new DependencyGatherer(this, project, hubProjectName,
+				hubProjectVersion);
+		dependencyGatherer.createBdioOutput();
+	}
+
+	public void deployHubOutput(final RestConnection restConnection, final String outputDirectory) {
 		logger.info("Deploying Black Duck I/O output");
+		ensureReportsDirectoryExists(outputDirectory);
+
 		final File file = getBdioFile(project);
 
 		final List<String> urlSegments = new ArrayList<>();
@@ -171,7 +189,7 @@ public class TaskHelper {
 				restConnection.getBaseUrl()));
 	}
 
-	public void waitForScans(final RestConnection restConnection, final String hubProjectName,
+	public void waitForHub(final RestConnection restConnection, final String hubProjectName,
 			final String hubProjectVersion, final long scanStartedTimeoutInMilliseconds,
 			final long scanFinishedTimeoutInMilliseconds) {
 		final Gson gson = new Gson();
