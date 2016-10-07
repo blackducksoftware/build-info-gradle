@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.build.bdio.Constants;
 import com.blackducksoftware.integration.build.bdio.Gav;
-import com.blackducksoftware.integration.hub.api.CodeLocationRestService;
-import com.blackducksoftware.integration.hub.api.PolicyStatusRestService;
-import com.blackducksoftware.integration.hub.api.ProjectRestService;
-import com.blackducksoftware.integration.hub.api.ProjectVersionRestService;
-import com.blackducksoftware.integration.hub.api.ScanSummaryRestService;
+import com.blackducksoftware.integration.builder.ValidationResultEnum;
+import com.blackducksoftware.integration.builder.ValidationResults;
+import com.blackducksoftware.integration.hub.api.codelocation.CodeLocationRestService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusEnum;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
+import com.blackducksoftware.integration.hub.api.policy.PolicyStatusRestService;
+import com.blackducksoftware.integration.hub.api.project.ProjectRestService;
+import com.blackducksoftware.integration.hub.api.project.ProjectVersionRestService;
+import com.blackducksoftware.integration.hub.api.scan.ScanSummaryRestService;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
-import com.blackducksoftware.integration.hub.builder.ValidationResults;
 import com.blackducksoftware.integration.hub.dataservices.policystatus.PolicyStatusDataService;
 import com.blackducksoftware.integration.hub.dataservices.scan.ScanStatusDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
@@ -40,8 +40,8 @@ import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseExce
 import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.logging.Slf4jIntLogger;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
@@ -126,7 +126,7 @@ public class TaskHelper {
 		builder.setProxyUsername(hubProxyUsername);
 		builder.setProxyPassword(hubProxyPassword);
 
-		final ValidationResults<GlobalFieldKey, HubServerConfig> results = builder.build();
+		final ValidationResults<GlobalFieldKey, HubServerConfig> results = builder.buildResults();
 		if (results.isSuccess()) {
 			final HubServerConfig hubServerConfig = results.getConstructedObject();
 			final RestConnection restConnection = new RestConnection(hubServerConfig.getHubUrl().toString());
