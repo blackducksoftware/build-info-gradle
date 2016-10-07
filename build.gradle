@@ -19,6 +19,7 @@ allprojects {
 repositories {
 	mavenLocal()
 	mavenCentral()
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url 'http://jcenter.bintray.com' }
 	maven { url 'https://updates.suite.blackducksoftware.com/integrations' }
 }
@@ -31,7 +32,7 @@ dependencies {
 	compile gradleApi()
 	compile localGroovy()
 	compile 'com.blackducksoftware.integration:build-tool-common:2.0.8'
-	compile 'com.blackducksoftware.integration:hub-common:1.4.9-SNAPSHOT'
+	compile 'com.blackducksoftware.integration:hub-common:1.4.8'
 	compile 'commons-io:commons-io:2.5'
 	compile 'com.google.code.gson:gson:2.7'
 
