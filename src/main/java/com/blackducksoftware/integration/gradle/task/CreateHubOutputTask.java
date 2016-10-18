@@ -29,14 +29,17 @@ import org.gradle.api.tasks.TaskAction;
 import com.blackducksoftware.integration.gradle.TaskHelper;
 
 public class CreateHubOutputTask extends DefaultTask {
-	public TaskHelper taskHelper;
-	public String hubProjectName;
-	public String hubProjectVersion;
-	public String outputDirectory;
+    public TaskHelper taskHelper;
 
-	@TaskAction
-	public void task() throws IOException {
-		taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
-	}
+    public String hubProjectName;
+
+    public String hubProjectVersion;
+
+    public String outputDirectory;
+
+    @TaskAction
+    public void task() throws IOException {
+        taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
+    }
 
 }

@@ -33,18 +33,18 @@ import org.junit.Test;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutputTask;
 
 public class HubGradlePluginTest {
-	@Test
-	public void canApplyPluginToProject() {
-		final Project project = ProjectBuilder.builder().build();
-		assertFalse(project.getPlugins().hasPlugin(HubGradlePlugin.class));
+    @Test
+    public void canApplyPluginToProject() {
+        final Project project = ProjectBuilder.builder().build();
+        assertFalse(project.getPlugins().hasPlugin(HubGradlePlugin.class));
 
-		project.getPluginManager().apply(HubGradlePlugin.class);
+        project.getPluginManager().apply(HubGradlePlugin.class);
 
-		assertTrue(project.getPlugins().hasPlugin(HubGradlePlugin.class));
+        assertTrue(project.getPlugins().hasPlugin(HubGradlePlugin.class));
 
-		final Task task = project.getTasks().getByName("createHubOutput");
-		assertNotNull(task);
-		assertTrue(task instanceof CreateHubOutputTask);
-	}
+        final Task task = project.getTasks().getByName("createHubOutput");
+        assertNotNull(task);
+        assertTrue(task instanceof CreateHubOutputTask);
+    }
 
 }

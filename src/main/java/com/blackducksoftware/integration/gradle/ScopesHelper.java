@@ -31,81 +31,84 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 
 public class ScopesHelper {
-	public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
+    public static final String INCLUDED_CONFIGURATIONS_PROPERTY = "IncludedConfigurations";
 
-	private final Project project;
-	private Set<String> allAvailableScopes;
-	private Set<String> requestedScopes;
-	private final Map<String, Boolean> shouldIncludeScopeMap = new HashMap<>();
+    private final Project project;
 
-	public ScopesHelper(final Project project) {
-		this.project = project;
-		populateRequestedScopes();
-		populateAllAvailableScopes();
-		populateShouldIncludeScopeMap();
-	}
+    private Set<String> allAvailableScopes;
 
-	public boolean shouldIncludeScope(final String scope) {
-		// include all scopes if none were requested
-		if (requestedScopes == null) {
-			return true;
-		}
+    private Set<String> requestedScopes;
 
-		if (requestedScopes != null && requestedScopes.size() == 0) {
-			return false;
-		}
+    private final Map<String, Boolean> shouldIncludeScopeMap = new HashMap<>();
 
-		if (scope == null || scope.trim().length() == 0) {
-			return false;
-		}
+    public ScopesHelper(final Project project) {
+        this.project = project;
+        populateRequestedScopes();
+        populateAllAvailableScopes();
+        populateShouldIncludeScopeMap();
+    }
 
-		final String scopeKey = scope.trim().toUpperCase();
-		if (shouldIncludeScopeMap.containsKey(scopeKey)) {
-			return shouldIncludeScopeMap.get(scopeKey);
-		} else {
-			return false;
-		}
-	}
+    public boolean shouldIncludeScope(final String scope) {
+        // include all scopes if none were requested
+        if (requestedScopes == null) {
+            return true;
+        }
 
-	public boolean shouldIncludeConfigurationInDependencyGraph(final String configuration) {
-		// if none were specifically requested, only include compile
-		if (requestedScopes == null) {
-			return "compile".equals(configuration);
-		} else {
-			return shouldIncludeScope(configuration);
-		}
-	}
+        if (requestedScopes != null && requestedScopes.size() == 0) {
+            return false;
+        }
 
-	private void populateAllAvailableScopes() {
-		allAvailableScopes = new HashSet<>();
+        if (scope == null || scope.trim().length() == 0) {
+            return false;
+        }
 
-		final ConfigurationContainer configurationContainer = project.getConfigurations();
-		for (final Configuration configuration : configurationContainer) {
-			allAvailableScopes.add(configuration.getName());
-		}
-	}
+        final String scopeKey = scope.trim().toUpperCase();
+        if (shouldIncludeScopeMap.containsKey(scopeKey)) {
+            return shouldIncludeScopeMap.get(scopeKey);
+        } else {
+            return false;
+        }
+    }
 
-	private void populateRequestedScopes() {
-		final String requestedScopesString = System.getProperty(INCLUDED_CONFIGURATIONS_PROPERTY);
-		if (requestedScopesString != null && requestedScopesString.trim().length() > 0) {
-			requestedScopes = new HashSet<>();
-			if (requestedScopesString.contains(",")) {
-				final String[] pieces = requestedScopesString.split(",");
-				for (final String piece : pieces) {
-					requestedScopes.add(piece.trim());
-				}
-			} else {
-				requestedScopes.add(requestedScopesString.trim());
-			}
-		}
-	}
+    public boolean shouldIncludeConfigurationInDependencyGraph(final String configuration) {
+        // if none were specifically requested, only include compile
+        if (requestedScopes == null) {
+            return "compile".equals(configuration);
+        } else {
+            return shouldIncludeScope(configuration);
+        }
+    }
 
-	private void populateShouldIncludeScopeMap() {
-		if (requestedScopes != null) {
-			for (final String scope : requestedScopes) {
-				shouldIncludeScopeMap.put(scope.trim().toUpperCase(), Boolean.TRUE);
-			}
-		}
-	}
+    private void populateAllAvailableScopes() {
+        allAvailableScopes = new HashSet<>();
+
+        final ConfigurationContainer configurationContainer = project.getConfigurations();
+        for (final Configuration configuration : configurationContainer) {
+            allAvailableScopes.add(configuration.getName());
+        }
+    }
+
+    private void populateRequestedScopes() {
+        final String requestedScopesString = System.getProperty(INCLUDED_CONFIGURATIONS_PROPERTY);
+        if (requestedScopesString != null && requestedScopesString.trim().length() > 0) {
+            requestedScopes = new HashSet<>();
+            if (requestedScopesString.contains(",")) {
+                final String[] pieces = requestedScopesString.split(",");
+                for (final String piece : pieces) {
+                    requestedScopes.add(piece.trim());
+                }
+            } else {
+                requestedScopes.add(requestedScopesString.trim());
+            }
+        }
+    }
+
+    private void populateShouldIncludeScopeMap() {
+        if (requestedScopes != null) {
+            for (final String scope : requestedScopes) {
+                shouldIncludeScopeMap.put(scope.trim().toUpperCase(), Boolean.TRUE);
+            }
+        }
+    }
 
 }
