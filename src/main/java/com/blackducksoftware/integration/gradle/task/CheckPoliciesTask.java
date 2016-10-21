@@ -1,65 +1,42 @@
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_ERROR;
+import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_STARTING;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.tasks.TaskAction;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.gradle.TaskHelper;
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
+import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
+import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
+import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class CheckPoliciesTask extends DefaultTask {
-    public TaskHelper taskHelper;
+public class CheckPoliciesTask extends HubTask {
+    @Override
+    public void performTask() {
+        logger.info(String.format(CHECK_POLICIES_STARTING, getBdioFilename()));
 
-    public String hubProjectName;
-
-    public String hubProjectVersion;
-
-    public String hubUrl;
-
-    public String hubUsername;
-
-    public String hubPassword;
-
-    public String hubTimeout;
-
-    public String hubProxyHost;
-
-    public String hubProxyPort;
-
-    public String hubNoProxyHosts;
-
-    public String hubProxyUsername;
-
-    public String hubProxyPassword;
-
-    @TaskAction
-    public void task() {
-        final HubServerConfigBuilder builder = new HubServerConfigBuilder();
-        builder.setHubUrl(hubUrl);
-        builder.setUsername(hubUsername);
-        builder.setPassword(hubPassword);
-        builder.setTimeout(hubTimeout);
-        builder.setProxyHost(hubProxyHost);
-        builder.setProxyPort(hubProxyPort);
-        builder.setIgnoredProxyHosts(hubNoProxyHosts);
-        builder.setProxyUsername(hubProxyUsername);
-        builder.setProxyPassword(hubProxyPassword);
-
-        final HubServerConfig hubServerConfig = builder.build();
-        RestConnection restConnection;
+        final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         try {
-            restConnection = new RestConnection(hubServerConfig);
-        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException e) {
-            throw new GradleException("Could not connect to the Hub - please check the logs for configuration errors.");
+            final RestConnection restConnection = new CredentialsRestConnection(hubServerConfig);
+            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(restConnection, getHubProjectName(),
+                    getHubVersionName());
+            handlePolicyStatusItem(policyStatusItem);
+        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
+                | ProjectDoesNotExistException | HubIntegrationException | MissingUUIDException | UnexpectedHubResponseException e) {
+            throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
         }
 
-        taskHelper.checkPolicies(restConnection, hubProjectName, hubProjectVersion);
+        logger.info(String.format(CHECK_POLICIES_FINISHED, getBdioFilename()));
     }
 
 }

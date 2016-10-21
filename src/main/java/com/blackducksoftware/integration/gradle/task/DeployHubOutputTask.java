@@ -21,44 +21,47 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_ERROR;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_ERROR;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_STARTING;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.gradle.api.GradleException;
-import org.gradle.api.tasks.TaskAction;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputTask extends HubTask {
-
     @Override
-    @TaskAction
     public void performTask() {
-        taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
 
-        final HubServerConfigBuilder builder = new HubServerConfigBuilder();
-        builder.setHubUrl(hubUrl);
-        builder.setUsername(hubUsername);
-        builder.setPassword(hubPassword);
-        builder.setTimeout(hubTimeout);
-        builder.setProxyHost(hubProxyHost);
-        builder.setProxyPort(hubProxyPort);
-        builder.setIgnoredProxyHosts(hubNoProxyHosts);
-        builder.setProxyUsername(hubProxyUsername);
-        builder.setProxyPassword(hubProxyPassword);
-
-        final HubServerConfig hubServerConfig = builder.build();
-        RestConnection restConnection;
         try {
-            restConnection = new RestConnection(hubServerConfig);
-        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException e) {
-            throw new GradleException("Could not connect to the Hub - please check the logs for configuration errors.");
+            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+        } catch (final IOException e) {
+            throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
-        taskHelper.deployHubOutput(restConnection, outputDirectory);
+        final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
+        RestConnection restConnection;
+        try {
+            restConnection = new CredentialsRestConnection(hubServerConfig);
+            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), restConnection, getOutputDirectory(),
+                    getHubProjectName());
+        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
+                | ResourceDoesNotExistException e) {
+            throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
+        }
+
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_FINISHED, getBdioFilename()));
     }
 
 }

@@ -1,79 +1,83 @@
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_ERROR;
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_ERROR;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_ERROR;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.tasks.TaskAction;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.gradle.TaskHelper;
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
+import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
+import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
+import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
+import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
-public class DeployHubOutputAndCheckPoliciesTask extends DefaultTask {
-    public TaskHelper taskHelper;
+public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
+    private long hubScanStartedTimeout = 300;
 
-    public String hubProjectName;
+    private long hubScanFinishedTimeout = 300;
 
-    public String hubProjectVersion;
+    @Override
+    public void performTask() {
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING, getBdioFilename()));
 
-    public long hubScanStartedTimeout;
-
-    public long hubScanFinishedTimeout;
-
-    public String hubUrl;
-
-    public String hubUsername;
-
-    public String hubPassword;
-
-    public String hubTimeout;
-
-    public String hubProxyHost;
-
-    public String hubProxyPort;
-
-    public String hubNoProxyHosts;
-
-    public String hubProxyUsername;
-
-    public String hubProxyPassword;
-
-    public String outputDirectory;
-
-    @TaskAction
-    public void task() throws IOException {
-        taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
-
-        final HubServerConfigBuilder builder = new HubServerConfigBuilder();
-        builder.setHubUrl(hubUrl);
-        builder.setUsername(hubUsername);
-        builder.setPassword(hubPassword);
-        builder.setTimeout(hubTimeout);
-        builder.setProxyHost(hubProxyHost);
-        builder.setProxyPort(hubProxyPort);
-        builder.setIgnoredProxyHosts(hubNoProxyHosts);
-        builder.setProxyUsername(hubProxyUsername);
-        builder.setProxyPassword(hubProxyPassword);
-
-        final HubServerConfig hubServerConfig = builder.build();
-        RestConnection restConnection;
         try {
-            restConnection = new RestConnection(hubServerConfig);
-        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException e) {
-            throw new GradleException("Could not connect to the Hub - please check the logs for configuration errors.");
+            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+        } catch (final IOException e) {
+            throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
-        taskHelper.deployHubOutput(restConnection, outputDirectory);
+        final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
+        final RestConnection restConnection;
+        try {
+            restConnection = new CredentialsRestConnection(hubServerConfig);
+            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), restConnection, getOutputDirectory(),
+                    getHubProjectName());
+        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
+                | ResourceDoesNotExistException e) {
+            throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
+        }
 
-        taskHelper.waitForHub(restConnection, hubProjectName, hubProjectVersion, hubScanStartedTimeout,
-                hubScanFinishedTimeout);
+        try {
+            PLUGIN_HELPER.waitForHub(restConnection, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
+                    getHubScanFinishedTimeout());
+            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(restConnection, getHubProjectName(),
+                    getHubVersionName());
+            handlePolicyStatusItem(policyStatusItem);
+        } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
+                | ProjectDoesNotExistException | HubIntegrationException | MissingUUIDException | UnexpectedHubResponseException e) {
+            throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
+        }
 
-        taskHelper.checkPolicies(restConnection, hubProjectName, hubProjectVersion);
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_FINISHED, getBdioFilename()));
+    }
+
+    public long getHubScanStartedTimeout() {
+        return hubScanStartedTimeout;
+    }
+
+    public void setHubScanStartedTimeout(long hubScanStartedTimeout) {
+        this.hubScanStartedTimeout = hubScanStartedTimeout;
+    }
+
+    public long getHubScanFinishedTimeout() {
+        return hubScanFinishedTimeout;
+    }
+
+    public void setHubScanFinishedTimeout(long hubScanFinishedTimeout) {
+        this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
 }

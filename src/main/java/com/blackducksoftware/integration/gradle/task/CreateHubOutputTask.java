@@ -21,25 +21,26 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_ERROR;
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_STARTING;
+
 import java.io.IOException;
 
-import org.gradle.api.DefaultTask;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.GradleException;
 
-import com.blackducksoftware.integration.gradle.TaskHelper;
+public class CreateHubOutputTask extends HubTask {
+    @Override
+    public void performTask() {
+        logger.info(String.format(CREATE_HUB_OUTPUT_STARTING, getBdioFilename()));
 
-public class CreateHubOutputTask extends DefaultTask {
-    public TaskHelper taskHelper;
+        try {
+            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+        } catch (final IOException e) {
+            throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
+        }
 
-    public String hubProjectName;
-
-    public String hubProjectVersion;
-
-    public String outputDirectory;
-
-    @TaskAction
-    public void task() throws IOException {
-        taskHelper.createHubOutput(hubProjectName, hubProjectVersion, outputDirectory);
+        logger.info(String.format(CREATE_HUB_OUTPUT_FINISHED, getBdioFilename()));
     }
 
 }

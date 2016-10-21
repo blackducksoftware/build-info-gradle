@@ -21,17 +21,12 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedConfiguration;
@@ -41,80 +36,22 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.build.DependencyNode;
 import com.blackducksoftware.integration.build.Gav;
-import com.blackducksoftware.integration.build.bdio.BdioConverter;
-import com.blackducksoftware.integration.build.bdio.CommonBomFormatter;
 
 public class DependencyGatherer {
-    public final static String PROPERTY_HUB_PROJECT_NAME = "hubProjectName";
-
-    public final static String PROPERTY_HUB_PROJECT_VERSION = "hubProjectVersion";
-
     private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
-
-    private final TaskHelper taskHelper;
-
-    private final Project rootProject;
 
     final Map<String, DependencyNode> visitedMap = new HashMap<>();
 
-    private final String hubProjectName;
-
-    private final String hubProjectVersion;
-
-    public DependencyGatherer(final TaskHelper taskHelper, final Project project) {
-        this.taskHelper = taskHelper;
-        this.rootProject = project;
-        this.hubProjectName = null;
-        this.hubProjectVersion = null;
-    }
-
-    public DependencyGatherer(final TaskHelper taskHelper, final Project project, final String hubProjectName,
-            final String hubProjectVersion) {
-        this.taskHelper = taskHelper;
-        this.rootProject = project;
-        this.hubProjectName = hubProjectName;
-        this.hubProjectVersion = hubProjectVersion;
-    }
-
-    private String getArtifactId() {
-        if (StringUtils.isNotBlank(hubProjectName)) {
-            return hubProjectName;
-        } else {
-            return rootProject.getName();
-        }
-    }
-
-    private String getVersion() {
-        if (StringUtils.isNotBlank(hubProjectVersion)) {
-            return hubProjectVersion;
-        } else {
-            return rootProject.getVersion().toString();
-        }
-    }
-
-    public void createBdioOutput() throws IOException {
-        final DependencyNode root = getFullyPopulatedRootNode();
-        logger.info("creating bdio output");
-        final File file = taskHelper.getBdioFile(rootProject);
-        try (final OutputStream outputStream = new FileOutputStream(file)) {
-            final BdioConverter bdioConverter = new BdioConverter();
-            final CommonBomFormatter commonBomFormatter = new CommonBomFormatter(bdioConverter);
-            commonBomFormatter.writeProject(outputStream, getArtifactId(), root);
-        }
-
-        logger.info("Created Black Duck I/O json: " + file.getAbsolutePath());
-    }
-
-    public DependencyNode getFullyPopulatedRootNode() {
+    public DependencyNode getFullyPopulatedRootNode(Project project, String hubProjectName, String hubProjectVersion) {
         logger.info("creating the dependency graph");
-        final String groupId = rootProject.getGroup().toString();
-        final String artifactId = getArtifactId();
-        final String version = getVersion();
+        final String groupId = project.getGroup().toString();
+        final String artifactId = hubProjectName;
+        final String version = hubProjectVersion;
         final Gav projectGav = new Gav(groupId, artifactId, version);
 
         final List<DependencyNode> children = new ArrayList<>();
         final DependencyNode root = new DependencyNode(projectGav, children);
-        for (final Project childProject : rootProject.getAllprojects()) {
+        for (final Project childProject : project.getAllprojects()) {
             getProjectDependencies(childProject, children);
         }
 
@@ -140,7 +77,8 @@ public class DependencyGatherer {
 
     private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, final int level,
             final String configuration) {
-        final String gavKey = createGavKey(resolvedDependency);
+        final Gav gav = createGavFromDependencyNode(resolvedDependency);
+        final String gavKey = gav.toString();
 
         final StringBuffer sb = new StringBuffer();
         if (logger.isDebugEnabled()) {
@@ -159,7 +97,6 @@ public class DependencyGatherer {
             }
             return visitedMap.get(gavKey);
         } else {
-            final Gav gav = createGavFromDependencyNode(resolvedDependency);
             if (logger.isDebugEnabled()) {
                 logger.debug(buffer + gavKey + " (created) config: " + configuration);
             }
@@ -173,12 +110,6 @@ public class DependencyGatherer {
             visitedMap.put(gavKey, dependencyNode);
             return dependencyNode;
         }
-    }
-
-    private String createGavKey(final ResolvedDependency resolvedDependency) {
-        final String gavKey = resolvedDependency.getModuleGroup() + ":" + resolvedDependency.getModuleName() + ":"
-                + resolvedDependency.getModuleVersion();
-        return gavKey;
     }
 
     private Gav createGavFromDependencyNode(final ResolvedDependency resolvedDependency) {

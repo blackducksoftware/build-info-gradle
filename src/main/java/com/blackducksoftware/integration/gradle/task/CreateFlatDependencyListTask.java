@@ -1,20 +1,25 @@
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPENDENCY_LIST_ERROR;
+import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPENDENCY_LIST_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPENDENCY_LIST_STARTING;
+
 import java.io.IOException;
 
-import org.gradle.api.DefaultTask;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.GradleException;
 
-import com.blackducksoftware.integration.gradle.TaskHelper;
+public class CreateFlatDependencyListTask extends HubTask {
+    @Override
+    public void performTask() {
+        logger.info(String.format(CREATE_FLAT_DEPENDENCY_LIST_STARTING, getFlatFilename()));
 
-public class CreateFlatDependencyListTask extends DefaultTask {
-    public TaskHelper taskHelper;
+        try {
+            PLUGIN_HELPER.createFlatDependencyList(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+        } catch (final IOException e) {
+            throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
+        }
 
-    public String outputDirectory;
-
-    @TaskAction
-    public void task() throws IOException {
-        taskHelper.createFlatDependencyList(outputDirectory);
+        logger.info(String.format(CREATE_FLAT_DEPENDENCY_LIST_FINISHED, getFlatFilename()));
     }
 
 }
