@@ -21,6 +21,12 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
+import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES;
+import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPENDENCY_LIST;
+import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.slf4j.Logger;
@@ -41,82 +47,87 @@ public class HubGradlePlugin implements Plugin<Project> {
             return;
         }
 
-        if (project.getTasks().findByName("createFlatDependencyList") == null) {
+        if (project.getTasks().findByName(CREATE_FLAT_DEPENDENCY_LIST) == null) {
             createFlatDependencyListTask(project);
         }
 
-        if (project.getTasks().findByName("createHubOutput") == null) {
+        if (project.getTasks().findByName(CREATE_HUB_OUTPUT) == null) {
             createCreateHubOutputTask(project);
         }
 
-        if (project.getTasks().findByName("deployHubOutput") == null) {
+        if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT) == null) {
             createDeployHubOutputTask(project);
         }
 
-        if (project.getTasks().findByName("checkPolicies") == null) {
+        if (project.getTasks().findByName(CHECK_POLICIES) == null) {
             createCheckPoliciesTask(project);
         }
 
-        if (project.getTasks().findByName("deployHubOutputAndCheckPolicies") == null) {
+        if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES) == null) {
             createDeployHubOutputAndCheckPoliciesTask(project);
         }
     }
 
     private void createFlatDependencyListTask(final Project project) {
-        logger.info(String.format("Configuring createFlatDependencyList task for project path: %s", project.getPath()));
+        logger.info(String.format("Configuring %s task for project path: %s", CREATE_FLAT_DEPENDENCY_LIST,
+                project.getPath()));
 
         final CreateFlatDependencyListTask createFlatDependencyList = project.getTasks()
-                .create("createFlatDependencyList", CreateFlatDependencyListTask.class);
+                .create(CREATE_FLAT_DEPENDENCY_LIST, CreateFlatDependencyListTask.class);
         createFlatDependencyList.setDescription("Create a flat list of unique dependencies.");
         createFlatDependencyList.setGroup("reporting");
 
-        logger.info("Successfully configured createFlatDependencyList");
+        logger.info(String.format("Successfully configured %s", CREATE_FLAT_DEPENDENCY_LIST));
     }
 
     private void createCreateHubOutputTask(final Project project) {
-        logger.info(String.format("Configuring createHubOutput task for project path: %s", project.getPath()));
+        logger.info(String.format("Configuring %s task for project path: %s", CREATE_HUB_OUTPUT,
+                project.getPath()));
 
-        final CreateHubOutputTask createHubOutput = project.getTasks().create("createHubOutput",
+        final CreateHubOutputTask createHubOutput = project.getTasks().create(CREATE_HUB_OUTPUT,
                 CreateHubOutputTask.class);
         createHubOutput.setDescription("Create the bdio file.");
         createHubOutput.setGroup("reporting");
 
-        logger.info("Successfully configured createHubOutput");
+        logger.info(String.format("Successfully configured %s", CREATE_HUB_OUTPUT));
     }
 
     private void createDeployHubOutputTask(final Project project) {
-        logger.info(String.format("Configuring deployHubOutput task for project path: %s", project.getPath()));
+        logger.info(String.format("Configuring %s task for project path: %s", DEPLOY_HUB_OUTPUT,
+                project.getPath()));
 
-        final DeployHubOutputTask deployHubOutput = project.getTasks().create("deployHubOutput",
+        final DeployHubOutputTask deployHubOutput = project.getTasks().create(DEPLOY_HUB_OUTPUT,
                 DeployHubOutputTask.class);
         deployHubOutput.setDescription("Deploy the bdio file to the Hub server.");
         deployHubOutput.setGroup("reporting");
 
-        logger.info("Successfully configured deployHubOutput");
+        logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT));
     }
 
     private void createCheckPoliciesTask(final Project project) {
-        logger.info(String.format("Configuring checkPolicies task for project path: %s", project.getPath()));
+        logger.info(String.format("Configuring %s task for project path: %s", CHECK_POLICIES,
+                project.getPath()));
 
-        final CheckPoliciesTask checkPolicies = project.getTasks().create("checkPolicies", CheckPoliciesTask.class);
-        checkPolicies.setDescription(
-                "Check the project's policies on the Hub. *Note: This will check ONLY the current policy status, NOT the updated status after a deploy of bdio output. For that, you would use deployHubOutputAndCheckPolicies.");
+        final CheckPoliciesTask checkPolicies = project.getTasks().create(CHECK_POLICIES, CheckPoliciesTask.class);
+        checkPolicies.setDescription(String.format(
+                "Check the project's policies on the Hub. *Note: This will check ONLY the current policy status, NOT the updated status after a deploy of bdio output. For that, you would use %s.",
+                DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES));
         checkPolicies.setGroup("reporting");
 
-        logger.info("Successfully configured checkPolicies");
+        logger.info(String.format("Successfully configured %s", CHECK_POLICIES));
     }
 
     private void createDeployHubOutputAndCheckPoliciesTask(final Project project) {
-        logger.info(String.format("Configuring deployHubOutputAndCheckPolicies task for project path: %s",
+        logger.info(String.format("Configuring %s task for project path: %s", DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES,
                 project.getPath()));
 
         final DeployHubOutputAndCheckPoliciesTask deployHubOutputAndCheckPolicies = project.getTasks()
-                .create("deployHubOutputAndCheckPolicies", DeployHubOutputAndCheckPoliciesTask.class);
+                .create(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES, DeployHubOutputAndCheckPoliciesTask.class);
         deployHubOutputAndCheckPolicies.setDescription(
                 "Create, then deploy the bdio file and wait for completion, then check the project's policies on the Hub.");
         deployHubOutputAndCheckPolicies.setGroup("reporting");
 
-        logger.info("Successfully configured deployHubOutputAndCheckPolicies");
+        logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES));
     }
 
 }

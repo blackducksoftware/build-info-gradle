@@ -31,8 +31,8 @@ description='Black Duck Hub Gradle Plugin'
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
-	compile 'com.blackducksoftware.integration:build-tool-common:2.0.12'
-	compile 'com.blackducksoftware.integration:hub-common:1.4.13'
+	compile 'com.blackducksoftware.integration:build-tool-common:2.2.0'
+	compile 'com.blackducksoftware.integration:hub-common:1.5.2'
 	compile 'commons-io:commons-io:2.5'
 	compile 'com.google.code.gson:gson:2.7'
 

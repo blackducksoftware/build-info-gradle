@@ -102,15 +102,6 @@ public abstract class HubTask extends DefaultTask {
         hubServerConfigBuilder.setProxyPassword(hubProxyPassword);
 
         return hubServerConfigBuilder;
-        // final HubServerConfig hubServerConfig = builder.build();
-        // RestConnection restConnection;
-        // try {
-        // restConnection = new RestConnection(hubServerConfig);
-        // } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException e) {
-        // throw new GradleException("Could not connect to the Hub - please check the logs for configuration errors.");
-        // }
-        //
-        // return restConnection;
     }
 
     public String getHubProjectName() {
