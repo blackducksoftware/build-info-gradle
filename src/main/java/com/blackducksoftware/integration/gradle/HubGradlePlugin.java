@@ -26,6 +26,7 @@ import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPE
 import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -36,6 +37,7 @@ import com.blackducksoftware.integration.gradle.task.CheckPoliciesTask;
 import com.blackducksoftware.integration.gradle.task.CreateFlatDependencyListTask;
 import com.blackducksoftware.integration.gradle.task.CreateHubOutputTask;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutputAndCheckPoliciesTask;
+import com.blackducksoftware.integration.gradle.task.DeployHubOutputAndCreateReportTask;
 import com.blackducksoftware.integration.gradle.task.DeployHubOutputTask;
 
 public class HubGradlePlugin implements Plugin<Project> {
@@ -65,6 +67,9 @@ public class HubGradlePlugin implements Plugin<Project> {
 
         if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES) == null) {
             createDeployHubOutputAndCheckPoliciesTask(project);
+        }
+        if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT) == null) {
+            createDeployHubOutputAndCreateReportTask(project);
         }
     }
 
@@ -128,6 +133,19 @@ public class HubGradlePlugin implements Plugin<Project> {
         deployHubOutputAndCheckPolicies.setGroup("reporting");
 
         logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES));
+    }
+
+    private void createDeployHubOutputAndCreateReportTask(final Project project) {
+        logger.info(String.format("Configuring %s task for project path: %s", DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT,
+                project.getPath()));
+
+        final DeployHubOutputAndCreateReportTask deployHubOutputAndCreateReport = project.getTasks()
+                .create(DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT, DeployHubOutputAndCreateReportTask.class);
+        deployHubOutputAndCreateReport.setDescription(
+                "Create, then deploy the bdio file and wait for completion, then create the report for the Project Version.");
+        deployHubOutputAndCreateReport.setGroup("reporting");
+
+        logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT));
     }
 
 }

@@ -21,10 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
-import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_ERROR;
 import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT_ERROR;
-import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_FINISHED;
-import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT_FINISHED;
+import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT_STARTING;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_ERROR;
 import static com.blackducksoftware.integration.build.Constants.FAILED_TO_CREATE_REPORT;
 
@@ -36,10 +35,8 @@ import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.api.HubServicesFactory;
-import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
 import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
 import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
@@ -48,14 +45,14 @@ import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
-public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
+public class DeployHubOutputAndCreateReportTask extends HubTask {
     private long hubScanStartedTimeout = 300;
 
     private long hubScanFinishedTimeout = 300;
 
     @Override
     public void performTask() {
-        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING, getBdioFilename()));
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT_STARTING, getBdioFilename()));
 
         try {
             PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
@@ -81,22 +78,14 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                     getHubScanFinishedTimeout());
             File reportOutput = new File(getOutputDirectory(), "report");
-            try {
-                PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
-            } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
-                    | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
-                throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
-            }
+            PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
 
-            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
-                    getHubVersionName());
-            handlePolicyStatusItem(policyStatusItem);
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
-                | ProjectDoesNotExistException | HubIntegrationException | MissingUUIDException | UnexpectedHubResponseException e) {
-            throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
+                | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
+            throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
         }
 
-        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_FINISHED, getBdioFilename()));
+        logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CREATE_REPORT_FINISHED, getBdioFilename()));
     }
 
     public long getHubScanStartedTimeout() {
