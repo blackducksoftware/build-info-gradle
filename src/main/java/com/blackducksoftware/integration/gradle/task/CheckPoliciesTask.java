@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
@@ -49,7 +50,8 @@ public class CheckPoliciesTask extends HubTask {
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         try {
             final RestConnection restConnection = new CredentialsRestConnection(hubServerConfig);
-            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(restConnection, getHubProjectName(),
+            HubServicesFactory services = new HubServicesFactory(restConnection);
+            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException

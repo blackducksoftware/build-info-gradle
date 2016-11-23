@@ -32,6 +32,7 @@ import java.net.URISyntaxException;
 import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -52,9 +53,11 @@ public class DeployHubOutputTask extends HubTask {
 
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         RestConnection restConnection;
+        HubServicesFactory services;
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
-            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), restConnection, getOutputDirectory(),
+            services = new HubServicesFactory(restConnection);
+            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), services, getOutputDirectory(),
                     getHubProjectName());
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
                 | ResourceDoesNotExistException e) {

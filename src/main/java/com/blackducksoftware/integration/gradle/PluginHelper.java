@@ -24,7 +24,9 @@ package com.blackducksoftware.integration.gradle;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +35,18 @@ import com.blackducksoftware.integration.build.Constants;
 import com.blackducksoftware.integration.build.DependencyNode;
 import com.blackducksoftware.integration.build.utils.BdioDependencyWriter;
 import com.blackducksoftware.integration.build.utils.FlatDependencyListWriter;
+import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.api.bom.BomImportRestService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
+import com.blackducksoftware.integration.hub.api.project.ProjectItem;
+import com.blackducksoftware.integration.hub.api.project.ProjectRestService;
+import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionItem;
+import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionRestService;
+import com.blackducksoftware.integration.hub.api.report.HubRiskReportData;
+import com.blackducksoftware.integration.hub.api.report.ReportCategoriesEnum;
+import com.blackducksoftware.integration.hub.api.report.ReportFormatEnum;
+import com.blackducksoftware.integration.hub.api.report.ReportRestService;
+import com.blackducksoftware.integration.hub.api.report.RiskReportResourceCopier;
 import com.blackducksoftware.integration.hub.dataservices.policystatus.PolicyStatusDataService;
 import com.blackducksoftware.integration.hub.dataservices.scan.ScanStatusDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
@@ -44,7 +55,6 @@ import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
 import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
 import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class PluginHelper {
@@ -68,22 +78,19 @@ public class PluginHelper {
         bdioDependencyWriter.write(outputDirectory, hubProjectName, rootNode);
     }
 
-    public void deployHubOutput(final Slf4jIntLogger logger, final RestConnection restConnection,
+    public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
             final File outputDirectory, final String hubProjectName) throws IOException, ResourceDoesNotExistException, URISyntaxException, BDRestException {
-        final DataServicesFactory dataServicesFactory = new DataServicesFactory(restConnection);
-        final BomImportRestService bomImportRestService = dataServicesFactory.getBomImportRestService();
-
         String filename = BdioDependencyWriter.getFilename(hubProjectName);
         final File file = new File(outputDirectory, filename);
+        BomImportRestService bomImportRestService = services.createBomImportRestService();
         bomImportRestService.importBomFile(file, Constants.BDIO_FILE_MEDIA_TYPE);
 
-        logger.info(String.format(Constants.UPLOAD_FILE_MESSAGE, file, restConnection.getBaseUrl()));
+        logger.info(String.format(Constants.UPLOAD_FILE_MESSAGE, file, bomImportRestService.getRestConnection().getBaseUrl()));
     }
 
-    public void waitForHub(final RestConnection restConnection, final String hubProjectName,
+    public void waitForHub(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion, final long scanStartedTimeout, final long scanFinishedTimeout) {
-        final DataServicesFactory dataServicesFactory = new DataServicesFactory(restConnection);
-        final ScanStatusDataService scanStatusDataService = dataServicesFactory.createScanStatusDataService();
+        ScanStatusDataService scanStatusDataService = services.createScanStatusDataService();
         try {
             scanStatusDataService.assertBomImportScanStartedThenFinished(hubProjectName, hubProjectVersion,
                     scanStartedTimeout * 1000, scanFinishedTimeout * 1000, new Slf4jIntLogger(logger));
@@ -93,12 +100,36 @@ public class PluginHelper {
         }
     }
 
-    public PolicyStatusItem checkPolicies(final RestConnection restConnection, final String hubProjectName,
+    public void createRiskReport(final Slf4jIntLogger logger, final HubServicesFactory services,
+            final File outputDirectory, String projectName, String projectVersionName)
+            throws IOException, BDRestException, URISyntaxException, HubIntegrationException, InterruptedException, UnexpectedHubResponseException,
+            ProjectDoesNotExistException {
+        ProjectRestService projectRestService = services.createProjectRestService();
+        ProjectVersionRestService projectVersionRestService = services.createProjectVersionRestService();
+        ReportRestService reportRestService = services.createReportRestService(logger);
+        ProjectItem project = projectRestService.getProjectByName(projectName);
+        ProjectVersionItem version = projectVersionRestService.getProjectVersion(project, projectVersionName);
+        final ReportCategoriesEnum[] categories = { ReportCategoriesEnum.VERSION, ReportCategoriesEnum.COMPONENTS };
+        HubRiskReportData riskreportData = reportRestService.generateHubReport(version, ReportFormatEnum.JSON, categories);
+        RiskReportResourceCopier copier = new RiskReportResourceCopier(outputDirectory.getCanonicalPath());
+        List<File> writtenFiles = copier.copy();
+        File htmlFile = null;
+        for (File file : writtenFiles) {
+            if (file.getName().equals("riskreport.html")) {
+                htmlFile = file;
+                break;
+            }
+        }
+        String htmlFileString = FileUtils.readFileToString(htmlFile, "UTF-8");
+        String reportString = services.getRestConnection().getGson().toJson(riskreportData);
+        htmlFileString = htmlFileString.replace("TOKEN_RISK_REPORT_JSON_TOKEN", reportString);
+        FileUtils.writeStringToFile(htmlFile, htmlFileString, "UTF-8");
+    }
+
+    public PolicyStatusItem checkPolicies(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion) throws IOException, URISyntaxException, BDRestException, ProjectDoesNotExistException, HubIntegrationException,
             MissingUUIDException, UnexpectedHubResponseException {
-        final DataServicesFactory dataServicesFactory = new DataServicesFactory(restConnection);
-        final PolicyStatusDataService policyStatusDataService = dataServicesFactory.createPolicyStatusDataService();
-
+        PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService();
         final PolicyStatusItem policyStatusItem = policyStatusDataService
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;

@@ -27,12 +27,14 @@ import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPU
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_ERROR;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
@@ -62,9 +64,12 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
 
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         final RestConnection restConnection;
+        Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
+        HubServicesFactory services;
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
-            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), restConnection, getOutputDirectory(),
+            services = new HubServicesFactory(restConnection);
+            PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
                     getHubProjectName());
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
                 | ResourceDoesNotExistException e) {
@@ -72,9 +77,17 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
         }
 
         try {
-            PLUGIN_HELPER.waitForHub(restConnection, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
+            PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                     getHubScanFinishedTimeout());
-            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(restConnection, getHubProjectName(),
+            File reportOutput = new File(getOutputDirectory(), "report");
+            try {
+                PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
+            } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
+                    | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
+                throw new GradleException(String.format("Could not create Hub Report, check the logs for specific issues: %s", e.getMessage()), e);
+            }
+
+            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
