@@ -69,6 +69,8 @@ public abstract class HubTask extends DefaultTask {
 
     private String hubProxyPassword;
 
+    private boolean createHubReport = true;
+
     private File outputDirectory;
 
     public HubTask() {
@@ -139,6 +141,14 @@ public abstract class HubTask extends DefaultTask {
         } else {
             return getProject().getVersion().toString();
         }
+    }
+
+    public boolean getCreateHubReport() {
+        return createHubReport;
+    }
+
+    public void setCreateHubReport(boolean createHubReport) {
+        this.createHubReport = createHubReport;
     }
 
     public boolean isHubIgnoreFailure() {

@@ -80,12 +80,14 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
         try {
             PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                     getHubScanFinishedTimeout());
-            File reportOutput = new File(getOutputDirectory(), "report");
-            try {
-                PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
-            } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
-                    | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
-                throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
+            if (getCreateHubReport()) {
+                File reportOutput = new File(getOutputDirectory(), "report");
+                try {
+                    PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
+                } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
+                        | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
+                    throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
+                }
             }
 
             final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),

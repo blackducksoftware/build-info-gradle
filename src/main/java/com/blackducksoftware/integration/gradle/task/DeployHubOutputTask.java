@@ -25,7 +25,9 @@ import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPU
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_ERROR;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_FINISHED;
 import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_STARTING;
+import static com.blackducksoftware.integration.build.Constants.FAILED_TO_CREATE_REPORT;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -34,13 +36,20 @@ import org.gradle.api.GradleException;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
 import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
+import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputTask extends HubTask {
+    private long hubScanStartedTimeout = 300;
+
+    private long hubScanFinishedTimeout = 300;
+
     @Override
     public void performTask() {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
@@ -52,19 +61,47 @@ public class DeployHubOutputTask extends HubTask {
         }
 
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
+        Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
         RestConnection restConnection;
         HubServicesFactory services;
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
-            PLUGIN_HELPER.deployHubOutput(new Slf4jIntLogger(logger), services, getOutputDirectory(),
+            PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
                     getHubProjectName());
+            if (getCreateHubReport()) {
+                PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
+                        getHubScanFinishedTimeout());
+                File reportOutput = new File(getOutputDirectory(), "report");
+                try {
+                    PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
+                } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
+                        | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
+                    throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
+                }
+            }
         } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
                 | ResourceDoesNotExistException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
         logger.info(String.format(DEPLOY_HUB_OUTPUT_FINISHED, getBdioFilename()));
+    }
+
+    public long getHubScanStartedTimeout() {
+        return hubScanStartedTimeout;
+    }
+
+    public void setHubScanStartedTimeout(long hubScanStartedTimeout) {
+        this.hubScanStartedTimeout = hubScanStartedTimeout;
+    }
+
+    public long getHubScanFinishedTimeout() {
+        return hubScanFinishedTimeout;
+    }
+
+    public void setHubScanFinishedTimeout(long hubScanFinishedTimeout) {
+        this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
 }
