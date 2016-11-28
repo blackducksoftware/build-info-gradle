@@ -71,6 +71,10 @@ public abstract class HubTask extends DefaultTask {
 
     private boolean createHubReport = true;
 
+    private long hubScanStartedTimeout = 300;
+
+    private long hubScanFinishedTimeout = 300;
+
     private File outputDirectory;
 
     public HubTask() {
@@ -245,6 +249,22 @@ public abstract class HubTask extends DefaultTask {
 
     public void setHubVersionName(String hubVersionName) {
         this.hubVersionName = hubVersionName;
+    }
+
+    public long getHubScanStartedTimeout() {
+        return hubScanStartedTimeout;
+    }
+
+    public void setHubScanStartedTimeout(long hubScanStartedTimeout) {
+        this.hubScanStartedTimeout = hubScanStartedTimeout;
+    }
+
+    public long getHubScanFinishedTimeout() {
+        return hubScanFinishedTimeout;
+    }
+
+    public void setHubScanFinishedTimeout(long hubScanFinishedTimeout) {
+        this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
 }

@@ -46,9 +46,6 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputTask extends HubTask {
-    private long hubScanStartedTimeout = 300;
-
-    private long hubScanFinishedTimeout = 300;
 
     @Override
     public void performTask() {
@@ -86,22 +83,6 @@ public class DeployHubOutputTask extends HubTask {
         }
 
         logger.info(String.format(DEPLOY_HUB_OUTPUT_FINISHED, getBdioFilename()));
-    }
-
-    public long getHubScanStartedTimeout() {
-        return hubScanStartedTimeout;
-    }
-
-    public void setHubScanStartedTimeout(long hubScanStartedTimeout) {
-        this.hubScanStartedTimeout = hubScanStartedTimeout;
-    }
-
-    public long getHubScanFinishedTimeout() {
-        return hubScanFinishedTimeout;
-    }
-
-    public void setHubScanFinishedTimeout(long hubScanFinishedTimeout) {
-        this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
 }
