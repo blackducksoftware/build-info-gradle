@@ -122,7 +122,7 @@ public class PluginHelper {
         }
         String htmlFileString = FileUtils.readFileToString(htmlFile, "UTF-8");
         String reportString = services.getRestConnection().getGson().toJson(riskreportData);
-        htmlFileString = htmlFileString.replace("TOKEN_RISK_REPORT_JSON_TOKEN", reportString);
+        htmlFileString = htmlFileString.replace(RiskReportResourceCopier.JSON_TOKEN_TO_REPLACE, reportString);
         FileUtils.writeStringToFile(htmlFile, htmlFileString, "UTF-8");
     }
 
