@@ -46,5 +46,4 @@ public class HubGradlePluginTest {
         assertNotNull(task);
         assertTrue(task instanceof CreateHubOutputTask);
     }
-
 }

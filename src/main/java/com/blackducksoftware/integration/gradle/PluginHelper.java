@@ -51,18 +51,18 @@ public class PluginHelper {
     private final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
 
     public void createFlatDependencyList(Project project, final String hubProjectName, final String hubProjectVersion,
-            final File outputDirectory) throws IOException {
-        final DependencyGatherer dependencyGatherer = new DependencyGatherer();
-        DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
+            final File outputDirectory, final String includedConfigurations) throws IOException {
+        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations);
+        final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final FlatDependencyListWriter flatDependencyListWriter = new FlatDependencyListWriter();
         flatDependencyListWriter.write(outputDirectory, hubProjectName, rootNode);
     }
 
     public void createHubOutput(Project project, final String hubProjectName, final String hubProjectVersion,
-            final File outputDirectory) throws IOException {
-        final DependencyGatherer dependencyGatherer = new DependencyGatherer();
-        DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
+            final File outputDirectory, final String includedConfigurations) throws IOException {
+        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations);
+        final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
         bdioDependencyWriter.write(outputDirectory, hubProjectName, rootNode);
@@ -70,9 +70,9 @@ public class PluginHelper {
 
     public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
             final File outputDirectory, final String hubProjectName) throws IOException, ResourceDoesNotExistException, URISyntaxException, BDRestException {
-        String filename = BdioDependencyWriter.getFilename(hubProjectName);
+        final String filename = BdioDependencyWriter.getFilename(hubProjectName);
         final File file = new File(outputDirectory, filename);
-        BomImportRestService bomImportRestService = services.createBomImportRestService();
+        final BomImportRestService bomImportRestService = services.createBomImportRestService();
         bomImportRestService.importBomFile(file, Constants.BDIO_FILE_MEDIA_TYPE);
 
         logger.info(String.format(Constants.UPLOAD_FILE_MESSAGE, file, bomImportRestService.getRestConnection().getBaseUrl()));
@@ -80,7 +80,7 @@ public class PluginHelper {
 
     public void waitForHub(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion, final long scanStartedTimeout, final long scanFinishedTimeout) {
-        ScanStatusDataService scanStatusDataService = services.createScanStatusDataService();
+        final ScanStatusDataService scanStatusDataService = services.createScanStatusDataService();
         try {
             scanStatusDataService.assertBomImportScanStartedThenFinished(hubProjectName, hubProjectVersion,
                     scanStartedTimeout * 1000, scanFinishedTimeout * 1000, new Slf4jIntLogger(logger));
@@ -94,14 +94,14 @@ public class PluginHelper {
             final File outputDirectory, String projectName, String projectVersionName)
             throws IOException, BDRestException, URISyntaxException, HubIntegrationException, InterruptedException, UnexpectedHubResponseException,
             ProjectDoesNotExistException {
-        RiskReportDataService reportDataService = services.createRiskReportDataService(logger);
+        final RiskReportDataService reportDataService = services.createRiskReportDataService(logger);
         reportDataService.createRiskReport(outputDirectory, projectName, projectVersionName);
     }
 
     public PolicyStatusItem checkPolicies(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion) throws IOException, URISyntaxException, BDRestException, ProjectDoesNotExistException, HubIntegrationException,
             MissingUUIDException, UnexpectedHubResponseException {
-        PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService();
+        final PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService();
         final PolicyStatusItem policyStatusItem = policyStatusDataService
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;

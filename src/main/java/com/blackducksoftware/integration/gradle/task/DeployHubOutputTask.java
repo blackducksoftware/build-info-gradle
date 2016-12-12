@@ -52,13 +52,13 @@ public class DeployHubOutputTask extends HubTask {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
 
         try {
-            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
-        Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
+        final Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
         RestConnection restConnection;
         HubServicesFactory services;
         try {
@@ -69,7 +69,7 @@ public class DeployHubOutputTask extends HubTask {
             if (getCreateHubReport()) {
                 PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                         getHubScanFinishedTimeout());
-                File reportOutput = new File(getOutputDirectory(), "report");
+                final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
                     PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
                 } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
