@@ -42,6 +42,12 @@ public class DependencyGatherer {
 
     final Map<String, DependencyNode> visitedMap = new HashMap<>();
 
+    final String includedConfigurations;
+
+    public DependencyGatherer(String includedConfigurations) {
+        this.includedConfigurations = includedConfigurations;
+    }
+
     public DependencyNode getFullyPopulatedRootNode(Project project, String hubProjectName, String hubProjectVersion) {
         logger.info("creating the dependency graph");
         final String groupId = project.getGroup().toString();
@@ -59,7 +65,7 @@ public class DependencyGatherer {
     }
 
     private void getProjectDependencies(final Project project, final List<DependencyNode> children) {
-        final ScopesHelper scopesHelper = new ScopesHelper(project);
+        final ScopesHelper scopesHelper = new ScopesHelper(project, includedConfigurations);
         final Set<Configuration> configurations = project.getConfigurations();
         for (final Configuration configuration : configurations) {
             final String configName = configuration.getName();

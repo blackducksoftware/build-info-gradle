@@ -41,8 +41,11 @@ public class ScopesHelper {
 
     private final Map<String, Boolean> shouldIncludeScopeMap = new HashMap<>();
 
-    public ScopesHelper(final Project project) {
+    private final String includedConfigurations;
+
+    public ScopesHelper(final Project project, String includedConfigurations) {
         this.project = project;
+        this.includedConfigurations = includedConfigurations;
         populateRequestedScopes();
         populateAllAvailableScopes();
         populateShouldIncludeScopeMap();
@@ -89,7 +92,14 @@ public class ScopesHelper {
     }
 
     private void populateRequestedScopes() {
-        final String requestedScopesString = System.getProperty(INCLUDED_CONFIGURATIONS_PROPERTY);
+        // using the system property is deprecated but for customers that may set it check for it.
+        String requestedScopesString = System.getProperty(INCLUDED_CONFIGURATIONS_PROPERTY);
+        // let the task property override the system property since the system property existed
+        // beforehand
+        if (includedConfigurations != null && includedConfigurations.trim().length() > 0) {
+            requestedScopesString = includedConfigurations;
+        }
+
         if (requestedScopesString != null && requestedScopesString.trim().length() > 0) {
             requestedScopes = new HashSet<>();
             if (requestedScopesString.contains(",")) {

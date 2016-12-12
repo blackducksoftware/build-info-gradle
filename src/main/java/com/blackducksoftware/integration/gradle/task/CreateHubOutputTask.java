@@ -35,7 +35,7 @@ public class CreateHubOutputTask extends HubTask {
         logger.info(String.format(CREATE_HUB_OUTPUT_STARTING, getBdioFilename()));
 
         try {
-            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }

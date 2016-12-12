@@ -77,8 +77,10 @@ public abstract class HubTask extends DefaultTask {
 
     private File outputDirectory;
 
+    private String includedConfigurations = "compile";
+
     public HubTask() {
-        File buildDir = null == getProject().getRootProject() ? getProject().getBuildDir() : getProject().getRootProject().getBuildDir();
+        final File buildDir = null == getProject().getRootProject() ? getProject().getBuildDir() : getProject().getRootProject().getBuildDir();
         outputDirectory = new File(buildDir, "blackduck");
     }
 
@@ -267,4 +269,11 @@ public abstract class HubTask extends DefaultTask {
         this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
+    public String getIncludedConfigurations() {
+        return includedConfigurations;
+    }
+
+    public void setIncludedConfigurations(String includedConfigurations) {
+        this.includedConfigurations = includedConfigurations;
+    }
 }
