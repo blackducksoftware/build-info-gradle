@@ -36,7 +36,7 @@ import com.blackducksoftware.integration.gradle.PluginHelper;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusEnum;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.dataservices.policystatus.PolicyStatusDescription;
+import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDescription;
 
 public abstract class HubTask extends DefaultTask {
     // NOTE: getClass() is a little strange here, but we want the runtime class,

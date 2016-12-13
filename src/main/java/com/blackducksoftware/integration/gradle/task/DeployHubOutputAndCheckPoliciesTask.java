@@ -30,22 +30,16 @@ import static com.blackducksoftware.integration.build.Constants.FAILED_TO_CREATE
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.api.HubServicesFactory;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
-import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
-import com.blackducksoftware.integration.hub.exception.ProjectDoesNotExistException;
-import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
-import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
@@ -69,8 +63,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             services = new HubServicesFactory(restConnection);
             PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
                     getHubProjectName());
-        } catch (IllegalArgumentException | URISyntaxException | BDRestException | EncryptionException | IOException
-                | ResourceDoesNotExistException e) {
+        } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
@@ -81,8 +74,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
                 final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
                     PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
-                } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
-                        | ProjectDoesNotExistException | HubIntegrationException | InterruptedException | UnexpectedHubResponseException e) {
+                } catch (HubIntegrationException e) {
                     throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
                 }
             }
@@ -90,8 +82,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
-        } catch (IllegalArgumentException | URISyntaxException | BDRestException | IOException
-                | ProjectDoesNotExistException | HubIntegrationException | MissingUUIDException | UnexpectedHubResponseException e) {
+        } catch (HubIntegrationException e) {
             throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
         }
 
