@@ -62,7 +62,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
             PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
-                    getHubProjectName());
+                    getProject().getName());
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
@@ -74,7 +74,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
                 final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
                     PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
-                } catch (HubIntegrationException e) {
+                } catch (final HubIntegrationException e) {
                     throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
                 }
             }
@@ -82,7 +82,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
-        } catch (HubIntegrationException e) {
+        } catch (final HubIntegrationException e) {
             throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
         }
 

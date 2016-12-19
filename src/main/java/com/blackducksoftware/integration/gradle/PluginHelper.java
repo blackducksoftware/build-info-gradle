@@ -59,7 +59,7 @@ public class PluginHelper {
         final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
-        bdioDependencyWriter.write(outputDirectory, hubProjectName, rootNode);
+        bdioDependencyWriter.write(outputDirectory, project.getName(), hubProjectName, rootNode);
     }
 
     public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
@@ -78,7 +78,7 @@ public class PluginHelper {
         try {
             scanStatusDataService.assertBomImportScanStartedThenFinished(hubProjectName, hubProjectVersion,
                     scanStartedTimeout * 1000, scanFinishedTimeout * 1000, new Slf4jIntLogger(logger));
-        } catch (HubIntegrationException e) {
+        } catch (final HubIntegrationException e) {
             logger.error(String.format(Constants.SCAN_ERROR_MESSAGE, e.getMessage()), e);
         }
     }
@@ -97,5 +97,4 @@ public class PluginHelper {
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;
     }
-
 }
