@@ -92,10 +92,9 @@ public class PluginHelper {
 
     public PolicyStatusItem checkPolicies(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion) throws HubIntegrationException {
-        final PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService(null);
+        final PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService(new Slf4jIntLogger(logger));
         final PolicyStatusItem policyStatusItem = policyStatusDataService
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;
     }
-
 }
