@@ -59,7 +59,7 @@ public class PluginHelper {
         final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
-        bdioDependencyWriter.write(outputDirectory, hubProjectName, rootNode);
+        bdioDependencyWriter.write(outputDirectory, project.getName(), hubProjectName, rootNode);
     }
 
     public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
@@ -74,11 +74,11 @@ public class PluginHelper {
 
     public void waitForHub(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion, final long scanStartedTimeout, final long scanFinishedTimeout) {
-        final ScanStatusDataService scanStatusDataService = services.createScanStatusDataService();
+        final ScanStatusDataService scanStatusDataService = services.createScanStatusDataService(new Slf4jIntLogger(logger));
         try {
             scanStatusDataService.assertBomImportScanStartedThenFinished(hubProjectName, hubProjectVersion,
                     scanStartedTimeout * 1000, scanFinishedTimeout * 1000, new Slf4jIntLogger(logger));
-        } catch (HubIntegrationException e) {
+        } catch (final HubIntegrationException e) {
             logger.error(String.format(Constants.SCAN_ERROR_MESSAGE, e.getMessage()), e);
         }
     }
@@ -92,7 +92,7 @@ public class PluginHelper {
 
     public PolicyStatusItem checkPolicies(final HubServicesFactory services, final String hubProjectName,
             final String hubProjectVersion) throws HubIntegrationException {
-        final PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService();
+        final PolicyStatusDataService policyStatusDataService = services.createPolicyStatusDataService(null);
         final PolicyStatusItem policyStatusItem = policyStatusDataService
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;

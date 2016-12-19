@@ -60,14 +60,14 @@ public class DeployHubOutputTask extends HubTask {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
             PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
-                    getHubProjectName());
+                    getProject().getName());
             if (getCreateHubReport()) {
                 PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                         getHubScanFinishedTimeout());
                 final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
                     PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
-                } catch (HubIntegrationException e) {
+                } catch (final HubIntegrationException e) {
                     throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
                 }
             }
