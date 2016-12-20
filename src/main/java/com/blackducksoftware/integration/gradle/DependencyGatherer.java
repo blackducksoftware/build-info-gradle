@@ -71,7 +71,6 @@ public class DependencyGatherer {
         final DependencyNode root = new DependencyNode(projectGav, children);
         for (final Project childProject : project.getAllprojects()) {
             if (!excludedModules.contains(childProject.getName())) {
-                System.out.println(childProject.getName());
                 getProjectDependencies(childProject, children);
             }
         }

@@ -41,7 +41,6 @@ import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputTask extends HubTask {
-
     @Override
     public void performTask() {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
