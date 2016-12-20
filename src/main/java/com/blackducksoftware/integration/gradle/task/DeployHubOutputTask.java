@@ -61,7 +61,7 @@ public class DeployHubOutputTask extends HubTask {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
             PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
-                    getHubProjectName());
+                    getProject().getName());
             if (getCreateHubReport()) {
                 PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
                         getHubScanFinishedTimeout());

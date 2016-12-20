@@ -63,7 +63,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
             PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
-                    getHubProjectName());
+                    getProject().getName());
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }

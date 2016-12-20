@@ -63,7 +63,7 @@ public class DependencyGatherer {
     public DependencyNode getFullyPopulatedRootNode(final Project project, final String hubProjectName, final String hubProjectVersion) {
         logger.info("creating the dependency graph");
         final String groupId = project.getGroup().toString();
-        final String artifactId = hubProjectName;
+        final String artifactId = project.getName();
         final String version = hubProjectVersion;
         final Gav projectGav = new Gav(groupId, artifactId, version);
 

@@ -59,7 +59,7 @@ public class PluginHelper {
         final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
-        bdioDependencyWriter.write(outputDirectory, hubProjectName, rootNode);
+        bdioDependencyWriter.write(outputDirectory, project.getName(), hubProjectName, rootNode);
     }
 
     public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
@@ -97,5 +97,4 @@ public class PluginHelper {
                 .getPolicyStatusForProjectAndVersion(hubProjectName, hubProjectVersion);
         return policyStatusItem;
     }
-
 }
