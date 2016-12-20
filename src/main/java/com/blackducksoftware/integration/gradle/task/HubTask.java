@@ -79,6 +79,8 @@ public abstract class HubTask extends DefaultTask {
 
     private String includedConfigurations = "compile";
 
+    private String excludedModules = "";
+
     public HubTask() {
         final File buildDir = null == getProject().getRootProject() ? getProject().getBuildDir() : getProject().getRootProject().getBuildDir();
         outputDirectory = new File(buildDir, "blackduck");
@@ -88,7 +90,7 @@ public abstract class HubTask extends DefaultTask {
     public void task() {
         try {
             performTask();
-        } catch (final GradleException e) {
+        } catch (final Exception e) {
             if (isHubIgnoreFailure()) {
                 logger.warn(String.format(
                         "Your task has failed: %s. Build will NOT be failed due to hub.ignore.failure being true.",
@@ -276,4 +278,13 @@ public abstract class HubTask extends DefaultTask {
     public void setIncludedConfigurations(String includedConfigurations) {
         this.includedConfigurations = includedConfigurations;
     }
+
+    public String getExcludedModules() {
+        return excludedModules;
+    }
+
+    public void setExcludedModules(String excludedModules) {
+        this.excludedModules = excludedModules;
+    }
+
 }

@@ -23,10 +23,12 @@ package com.blackducksoftware.integration.gradle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedConfiguration;
@@ -44,11 +46,21 @@ public class DependencyGatherer {
 
     final String includedConfigurations;
 
-    public DependencyGatherer(String includedConfigurations) {
+    final Set<String> excludedModules = new HashSet<>();
+
+    public DependencyGatherer(final String includedConfigurations, final String excludedModules) {
         this.includedConfigurations = includedConfigurations;
+        if (StringUtils.isNotBlank(excludedModules)) {
+            final String[] pieces = excludedModules.split(",");
+            for (final String piece : pieces) {
+                if (StringUtils.isNotBlank(piece)) {
+                    this.excludedModules.add(piece);
+                }
+            }
+        }
     }
 
-    public DependencyNode getFullyPopulatedRootNode(Project project, String hubProjectName, String hubProjectVersion) {
+    public DependencyNode getFullyPopulatedRootNode(final Project project, final String hubProjectName, final String hubProjectVersion) {
         logger.info("creating the dependency graph");
         final String groupId = project.getGroup().toString();
         final String artifactId = hubProjectName;
@@ -58,7 +70,10 @@ public class DependencyGatherer {
         final List<DependencyNode> children = new ArrayList<>();
         final DependencyNode root = new DependencyNode(projectGav, children);
         for (final Project childProject : project.getAllprojects()) {
-            getProjectDependencies(childProject, children);
+            if (!excludedModules.contains(childProject.getName())) {
+                System.out.println(childProject.getName());
+                getProjectDependencies(childProject, children);
+            }
         }
 
         return root;

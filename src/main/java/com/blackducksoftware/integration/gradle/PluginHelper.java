@@ -44,18 +44,18 @@ import com.blackducksoftware.integration.log.Slf4jIntLogger;
 public class PluginHelper {
     private final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
 
-    public void createFlatDependencyList(Project project, final String hubProjectName, final String hubProjectVersion,
-            final File outputDirectory, final String includedConfigurations) throws IOException {
-        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations);
+    public void createFlatDependencyList(final Project project, final String hubProjectName, final String hubProjectVersion,
+            final File outputDirectory, final String includedConfigurations, final String excludedModules) throws IOException {
+        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations, excludedModules);
         final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final FlatDependencyListWriter flatDependencyListWriter = new FlatDependencyListWriter();
         flatDependencyListWriter.write(outputDirectory, hubProjectName, rootNode);
     }
 
-    public void createHubOutput(Project project, final String hubProjectName, final String hubProjectVersion,
-            final File outputDirectory, final String includedConfigurations) throws IOException {
-        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations);
+    public void createHubOutput(final Project project, final String hubProjectName, final String hubProjectVersion,
+            final File outputDirectory, final String includedConfigurations, final String excludedModules) throws IOException {
+        final DependencyGatherer dependencyGatherer = new DependencyGatherer(includedConfigurations, excludedModules);
         final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(project, hubProjectName, hubProjectVersion);
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
@@ -78,13 +78,13 @@ public class PluginHelper {
         try {
             scanStatusDataService.assertBomImportScanStartedThenFinished(hubProjectName, hubProjectVersion,
                     scanStartedTimeout * 1000, scanFinishedTimeout * 1000, new Slf4jIntLogger(logger));
-        } catch (HubIntegrationException e) {
+        } catch (final HubIntegrationException e) {
             logger.error(String.format(Constants.SCAN_ERROR_MESSAGE, e.getMessage()), e);
         }
     }
 
     public void createRiskReport(final Slf4jIntLogger logger, final HubServicesFactory services,
-            final File outputDirectory, String projectName, String projectVersionName)
+            final File outputDirectory, final String projectName, final String projectVersionName)
             throws HubIntegrationException {
         final RiskReportDataService reportDataService = services.createRiskReportDataService(logger);
         reportDataService.createRiskReportFiles(outputDirectory, projectName, projectVersionName);

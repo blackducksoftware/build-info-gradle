@@ -35,7 +35,8 @@ public class CreateFlatDependencyListTask extends HubTask {
         logger.info(String.format(CREATE_FLAT_DEPENDENCY_LIST_STARTING, getFlatFilename()));
 
         try {
-            PLUGIN_HELPER.createFlatDependencyList(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations());
+            PLUGIN_HELPER.createFlatDependencyList(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations(),
+                    getExcludedModules());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
         }
