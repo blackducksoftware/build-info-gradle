@@ -32,14 +32,7 @@ import com.blackducksoftware.integration.build.Constants;
 import com.blackducksoftware.integration.build.DependencyNode;
 import com.blackducksoftware.integration.build.utils.BdioDependencyWriter;
 import com.blackducksoftware.integration.build.utils.FlatDependencyListWriter;
-import com.blackducksoftware.integration.hub.api.bom.BomImportRequestService;
-import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
-import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDataService;
-import com.blackducksoftware.integration.hub.dataservice.report.RiskReportDataService;
-import com.blackducksoftware.integration.hub.dataservice.scan.ScanStatusDataService;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.service.HubServicesFactory;
-import com.blackducksoftware.integration.log.Slf4jIntLogger;
+import com.blackducksoftware.integration.build.utils.ProjectVersionWriter;
 
 public class PluginHelper {
     private final Logger logger = LoggerFactory.getLogger(PluginHelper.class);
@@ -51,6 +44,9 @@ public class PluginHelper {
 
         final FlatDependencyListWriter flatDependencyListWriter = new FlatDependencyListWriter();
         flatDependencyListWriter.write(outputDirectory, hubProjectName, rootNode);
+
+        final ProjectVersionWriter projectVersionWriter = new ProjectVersionWriter();
+        projectVersionWriter.write(outputDirectory, hubProjectVersion);
     }
 
     public void createHubOutput(final Project project, final String hubProjectName, final String hubProjectVersion,
@@ -60,6 +56,9 @@ public class PluginHelper {
 
         final BdioDependencyWriter bdioDependencyWriter = new BdioDependencyWriter();
         bdioDependencyWriter.write(outputDirectory, project.getName(), hubProjectName, rootNode);
+
+        final ProjectVersionWriter projectVersionWriter = new ProjectVersionWriter();
+        projectVersionWriter.write(outputDirectory, hubProjectVersion);
     }
 
     public void deployHubOutput(final Slf4jIntLogger logger, final HubServicesFactory services,
