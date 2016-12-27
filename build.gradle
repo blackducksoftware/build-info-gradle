@@ -121,6 +121,12 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 task releaseNexusRepository(type: StagingRepositoryTask) { sonatypeStagingProfileName = 'com.blackducksoftware' }
 
+task printVersion {
+    doLast{
+       println project.version
+    }
+}
+
 artifacts {
     archives jar
     archives sourcesJar
