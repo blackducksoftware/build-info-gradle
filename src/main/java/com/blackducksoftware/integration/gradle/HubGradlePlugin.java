@@ -21,11 +21,11 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES;
-import static com.blackducksoftware.integration.build.Constants.CREATE_FLAT_DEPENDENCY_LIST;
-import static com.blackducksoftware.integration.build.Constants.CREATE_HUB_OUTPUT;
-import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT;
-import static com.blackducksoftware.integration.build.Constants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CREATE_FLAT_DEPENDENCY_LIST;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CREATE_HUB_OUTPUT;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;

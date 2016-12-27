@@ -21,9 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
-import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_ERROR;
-import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_FINISHED;
-import static com.blackducksoftware.integration.build.Constants.CHECK_POLICIES_STARTING;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES_ERROR;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES_FINISHED;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES_STARTING;
 
 import org.gradle.api.GradleException;
 
@@ -43,7 +43,7 @@ public class CheckPoliciesTask extends HubTask {
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         try {
             final RestConnection restConnection = new CredentialsRestConnection(hubServerConfig);
-            HubServicesFactory services = new HubServicesFactory(restConnection);
+            final HubServicesFactory services = new HubServicesFactory(restConnection);
             final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);

@@ -30,12 +30,12 @@ import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.build.utils.BdioDependencyWriter;
-import com.blackducksoftware.integration.build.utils.FlatDependencyListWriter;
 import com.blackducksoftware.integration.gradle.PluginHelper;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusEnum;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
+import com.blackducksoftware.integration.hub.buildtool.FlatDependencyListWriter;
+import com.blackducksoftware.integration.hub.buildtool.bdio.BdioDependencyWriter;
 import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDescription;
 
 public abstract class HubTask extends DefaultTask {
@@ -103,7 +103,7 @@ public abstract class HubTask extends DefaultTask {
 
     public abstract void performTask();
 
-    public void handlePolicyStatusItem(PolicyStatusItem policyStatusItem) {
+    public void handlePolicyStatusItem(final PolicyStatusItem policyStatusItem) {
         final PolicyStatusDescription policyStatusDescription = new PolicyStatusDescription(policyStatusItem);
         final String policyStatusMessage = policyStatusDescription.getPolicyStatusMessage();
         logger.info(policyStatusMessage);
@@ -155,7 +155,7 @@ public abstract class HubTask extends DefaultTask {
         return createHubReport;
     }
 
-    public void setCreateHubReport(boolean createHubReport) {
+    public void setCreateHubReport(final boolean createHubReport) {
         this.createHubReport = createHubReport;
     }
 
@@ -163,7 +163,7 @@ public abstract class HubTask extends DefaultTask {
         return hubIgnoreFailure;
     }
 
-    public void setHubIgnoreFailure(boolean hubIgnoreFailure) {
+    public void setHubIgnoreFailure(final boolean hubIgnoreFailure) {
         this.hubIgnoreFailure = hubIgnoreFailure;
     }
 
@@ -171,7 +171,7 @@ public abstract class HubTask extends DefaultTask {
         return hubUrl;
     }
 
-    public void setHubUrl(String hubUrl) {
+    public void setHubUrl(final String hubUrl) {
         this.hubUrl = hubUrl;
     }
 
@@ -179,7 +179,7 @@ public abstract class HubTask extends DefaultTask {
         return hubUsername;
     }
 
-    public void setHubUsername(String hubUsername) {
+    public void setHubUsername(final String hubUsername) {
         this.hubUsername = hubUsername;
     }
 
@@ -187,7 +187,7 @@ public abstract class HubTask extends DefaultTask {
         return hubPassword;
     }
 
-    public void setHubPassword(String hubPassword) {
+    public void setHubPassword(final String hubPassword) {
         this.hubPassword = hubPassword;
     }
 
@@ -195,7 +195,7 @@ public abstract class HubTask extends DefaultTask {
         return hubTimeout;
     }
 
-    public void setHubTimeout(int hubTimeout) {
+    public void setHubTimeout(final int hubTimeout) {
         this.hubTimeout = hubTimeout;
     }
 
@@ -203,7 +203,7 @@ public abstract class HubTask extends DefaultTask {
         return hubProxyHost;
     }
 
-    public void setHubProxyHost(String hubProxyHost) {
+    public void setHubProxyHost(final String hubProxyHost) {
         this.hubProxyHost = hubProxyHost;
     }
 
@@ -211,7 +211,7 @@ public abstract class HubTask extends DefaultTask {
         return hubProxyPort;
     }
 
-    public void setHubProxyPort(String hubProxyPort) {
+    public void setHubProxyPort(final String hubProxyPort) {
         this.hubProxyPort = hubProxyPort;
     }
 
@@ -219,7 +219,7 @@ public abstract class HubTask extends DefaultTask {
         return hubNoProxyHosts;
     }
 
-    public void setHubNoProxyHosts(String hubNoProxyHosts) {
+    public void setHubNoProxyHosts(final String hubNoProxyHosts) {
         this.hubNoProxyHosts = hubNoProxyHosts;
     }
 
@@ -227,7 +227,7 @@ public abstract class HubTask extends DefaultTask {
         return hubProxyUsername;
     }
 
-    public void setHubProxyUsername(String hubProxyUsername) {
+    public void setHubProxyUsername(final String hubProxyUsername) {
         this.hubProxyUsername = hubProxyUsername;
     }
 
@@ -235,7 +235,7 @@ public abstract class HubTask extends DefaultTask {
         return hubProxyPassword;
     }
 
-    public void setHubProxyPassword(String hubProxyPassword) {
+    public void setHubProxyPassword(final String hubProxyPassword) {
         this.hubProxyPassword = hubProxyPassword;
     }
 
@@ -243,15 +243,15 @@ public abstract class HubTask extends DefaultTask {
         return outputDirectory;
     }
 
-    public void setOutputDirectory(File outputDirectory) {
+    public void setOutputDirectory(final File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
-    public void setHubProjectName(String hubProjectName) {
+    public void setHubProjectName(final String hubProjectName) {
         this.hubProjectName = hubProjectName;
     }
 
-    public void setHubVersionName(String hubVersionName) {
+    public void setHubVersionName(final String hubVersionName) {
         this.hubVersionName = hubVersionName;
     }
 
@@ -259,7 +259,7 @@ public abstract class HubTask extends DefaultTask {
         return hubScanStartedTimeout;
     }
 
-    public void setHubScanStartedTimeout(long hubScanStartedTimeout) {
+    public void setHubScanStartedTimeout(final long hubScanStartedTimeout) {
         this.hubScanStartedTimeout = hubScanStartedTimeout;
     }
 
@@ -267,7 +267,7 @@ public abstract class HubTask extends DefaultTask {
         return hubScanFinishedTimeout;
     }
 
-    public void setHubScanFinishedTimeout(long hubScanFinishedTimeout) {
+    public void setHubScanFinishedTimeout(final long hubScanFinishedTimeout) {
         this.hubScanFinishedTimeout = hubScanFinishedTimeout;
     }
 
@@ -275,7 +275,7 @@ public abstract class HubTask extends DefaultTask {
         return includedConfigurations;
     }
 
-    public void setIncludedConfigurations(String includedConfigurations) {
+    public void setIncludedConfigurations(final String includedConfigurations) {
         this.includedConfigurations = includedConfigurations;
     }
 
@@ -283,7 +283,7 @@ public abstract class HubTask extends DefaultTask {
         return excludedModules;
     }
 
-    public void setExcludedModules(String excludedModules) {
+    public void setExcludedModules(final String excludedModules) {
         this.excludedModules = excludedModules;
     }
 

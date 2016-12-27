@@ -36,8 +36,8 @@ import org.gradle.api.artifacts.ResolvedDependency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.build.DependencyNode;
-import com.blackducksoftware.integration.build.Gav;
+import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
+import com.blackducksoftware.integration.hub.buildtool.Gav;
 
 public class DependencyGatherer {
     private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
