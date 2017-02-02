@@ -42,7 +42,7 @@ public class CreateHubOutputTask extends HubTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            PLUGIN_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+            BUILD_TOOL_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }

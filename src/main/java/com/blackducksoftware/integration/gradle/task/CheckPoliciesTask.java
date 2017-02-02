@@ -44,7 +44,7 @@ public class CheckPoliciesTask extends HubTask {
         try {
             final RestConnection restConnection = new CredentialsRestConnection(hubServerConfig);
             final HubServicesFactory services = new HubServicesFactory(restConnection);
-            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
+            final PolicyStatusItem policyStatusItem = BUILD_TOOL_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {

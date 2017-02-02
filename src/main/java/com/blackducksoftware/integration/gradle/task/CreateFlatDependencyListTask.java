@@ -42,7 +42,7 @@ public class CreateFlatDependencyListTask extends HubTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            PLUGIN_HELPER.createFlatOutput(rootNode, getHubProjectName(), getHubVersionName(), getOutputDirectory());
+            BUILD_TOOL_HELPER.createFlatOutput(rootNode, getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
         }

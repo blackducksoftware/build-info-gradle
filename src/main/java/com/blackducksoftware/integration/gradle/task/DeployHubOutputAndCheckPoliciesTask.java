@@ -54,7 +54,7 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            PLUGIN_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
+            BUILD_TOOL_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
@@ -66,24 +66,24 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
             // FIXME project name???
-            PLUGIN_HELPER.deployHubOutput(services, getOutputDirectory(),
+            BUILD_TOOL_HELPER.deployHubOutput(services, getOutputDirectory(),
                     getProject().getName());
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
         try {
-            PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
+            BUILD_TOOL_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
             if (getCreateHubReport()) {
                 final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
-                    PLUGIN_HELPER.createRiskReport(services, reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
+                    BUILD_TOOL_HELPER.createRiskReport(services, reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
                 } catch (final HubIntegrationException e) {
                     throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
                 }
             }
 
-            final PolicyStatusItem policyStatusItem = PLUGIN_HELPER.checkPolicies(services, getHubProjectName(),
+            final PolicyStatusItem policyStatusItem = BUILD_TOOL_HELPER.checkPolicies(services, getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
         } catch (final HubIntegrationException e) {
