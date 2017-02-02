@@ -29,14 +29,20 @@ import java.io.IOException;
 
 import org.gradle.api.GradleException;
 
+import com.blackducksoftware.integration.gradle.DependencyGatherer;
+import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
+
 public class CreateHubOutputTask extends HubTask {
     @Override
     public void performTask() {
         logger.info(String.format(CREATE_HUB_OUTPUT_STARTING, getBdioFilename()));
 
         try {
-            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations(),
+            final DependencyGatherer dependencyGatherer = new DependencyGatherer(getIncludedConfigurations(),
                     getExcludedModules());
+            final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
+
+            PLUGIN_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }

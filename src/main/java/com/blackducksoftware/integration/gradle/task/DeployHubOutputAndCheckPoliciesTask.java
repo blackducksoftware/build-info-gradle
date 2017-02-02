@@ -34,13 +34,14 @@ import java.io.IOException;
 import org.gradle.api.GradleException;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.gradle.DependencyGatherer;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
+import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
-import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
 
@@ -49,32 +50,34 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES_STARTING, getBdioFilename()));
 
         try {
-            PLUGIN_HELPER.createHubOutput(getProject(), getHubProjectName(), getHubVersionName(), getOutputDirectory(), getIncludedConfigurations(),
+            final DependencyGatherer dependencyGatherer = new DependencyGatherer(getIncludedConfigurations(),
                     getExcludedModules());
+            final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
+
+            PLUGIN_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
         final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
         final RestConnection restConnection;
-        final Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
         HubServicesFactory services;
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
-            PLUGIN_HELPER.deployHubOutput(intLogger, services, getOutputDirectory(),
+            // FIXME project name???
+            PLUGIN_HELPER.deployHubOutput(services, getOutputDirectory(),
                     getProject().getName());
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
 
         try {
-            PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanStartedTimeout(),
-                    getHubScanFinishedTimeout());
+            PLUGIN_HELPER.waitForHub(services, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
             if (getCreateHubReport()) {
                 final File reportOutput = new File(getOutputDirectory(), "report");
                 try {
-                    PLUGIN_HELPER.createRiskReport(intLogger, services, reportOutput, getHubProjectName(), getHubVersionName());
+                    PLUGIN_HELPER.createRiskReport(services, reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
                 } catch (final HubIntegrationException e) {
                     throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
                 }

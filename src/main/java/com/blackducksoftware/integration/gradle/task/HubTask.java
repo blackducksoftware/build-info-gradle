@@ -30,20 +30,21 @@ import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.gradle.PluginHelper;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusEnum;
 import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.buildtool.FlatDependencyListWriter;
 import com.blackducksoftware.integration.hub.buildtool.bdio.BdioDependencyWriter;
 import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDescription;
+import com.blackducksoftware.integration.hub.dependency.DependencyManagerHelper;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public abstract class HubTask extends DefaultTask {
     // NOTE: getClass() is a little strange here, but we want the runtime class,
     // not HubTask, as it is abstract.
     public final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static final PluginHelper PLUGIN_HELPER = new PluginHelper();
+    public static final DependencyManagerHelper PLUGIN_HELPER = new DependencyManagerHelper(new Slf4jIntLogger(LoggerFactory.getLogger(HubTask.class)));
 
     private boolean hubIgnoreFailure = false;
 
@@ -71,9 +72,7 @@ public abstract class HubTask extends DefaultTask {
 
     private boolean createHubReport = true;
 
-    private long hubScanStartedTimeout = 300;
-
-    private long hubScanFinishedTimeout = 300;
+    private long hubScanTimeout = 300;
 
     private File outputDirectory;
 
@@ -255,20 +254,12 @@ public abstract class HubTask extends DefaultTask {
         this.hubVersionName = hubVersionName;
     }
 
-    public long getHubScanStartedTimeout() {
-        return hubScanStartedTimeout;
+    public long getHubScanTimeout() {
+        return hubScanTimeout;
     }
 
-    public void setHubScanStartedTimeout(final long hubScanStartedTimeout) {
-        this.hubScanStartedTimeout = hubScanStartedTimeout;
-    }
-
-    public long getHubScanFinishedTimeout() {
-        return hubScanFinishedTimeout;
-    }
-
-    public void setHubScanFinishedTimeout(final long hubScanFinishedTimeout) {
-        this.hubScanFinishedTimeout = hubScanFinishedTimeout;
+    public void setHubScanTimeout(final long hubScanTimeout) {
+        this.hubScanTimeout = hubScanTimeout;
     }
 
     public String getIncludedConfigurations() {
