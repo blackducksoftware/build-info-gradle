@@ -62,7 +62,6 @@ public class DeployHubOutputTask extends HubTask {
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
-            // FIXME project name???
             BUILD_TOOL_HELPER.deployHubOutput(services, getOutputDirectory(),
                     getProject().getName());
             if (getCreateHubReport()) {

@@ -65,7 +65,6 @@ public class DeployHubOutputAndCheckPoliciesTask extends HubTask {
         try {
             restConnection = new CredentialsRestConnection(hubServerConfig);
             services = new HubServicesFactory(restConnection);
-            // FIXME project name???
             BUILD_TOOL_HELPER.deployHubOutput(services, getOutputDirectory(),
                     getProject().getName());
         } catch (HubIntegrationException | IllegalArgumentException | EncryptionException e) {
