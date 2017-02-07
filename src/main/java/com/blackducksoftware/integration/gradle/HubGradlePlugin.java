@@ -21,22 +21,14 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES;
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CREATE_FLAT_DEPENDENCY_LIST;
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CREATE_HUB_OUTPUT;
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT;
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES;
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.BUILD_TOOL_STEP_CAMEL;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.gradle.task.CheckPoliciesTask;
-import com.blackducksoftware.integration.gradle.task.CreateFlatDependencyListTask;
-import com.blackducksoftware.integration.gradle.task.CreateHubOutputTask;
-import com.blackducksoftware.integration.gradle.task.DeployHubOutputAndCheckPoliciesTask;
-import com.blackducksoftware.integration.gradle.task.DeployHubOutputTask;
+import com.blackducksoftware.integration.gradle.task.BuildBOMTask;
 
 public class HubGradlePlugin implements Plugin<Project> {
     private final Logger logger = LoggerFactory.getLogger(HubGradlePlugin.class);
@@ -47,87 +39,23 @@ public class HubGradlePlugin implements Plugin<Project> {
             return;
         }
 
-        if (project.getTasks().findByName(CREATE_FLAT_DEPENDENCY_LIST) == null) {
-            createFlatDependencyListTask(project);
-        }
-
-        if (project.getTasks().findByName(CREATE_HUB_OUTPUT) == null) {
-            createCreateHubOutputTask(project);
-        }
-
-        if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT) == null) {
-            createDeployHubOutputTask(project);
-        }
-
-        if (project.getTasks().findByName(CHECK_POLICIES) == null) {
-            createCheckPoliciesTask(project);
-        }
-
-        if (project.getTasks().findByName(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES) == null) {
-            createDeployHubOutputAndCheckPoliciesTask(project);
+        if (project.getTasks().findByName(BUILD_TOOL_STEP_CAMEL) == null) {
+            runBuildBom(project);
         }
     }
 
-    private void createFlatDependencyListTask(final Project project) {
-        logger.info(String.format("Configuring %s task for project path: %s", CREATE_FLAT_DEPENDENCY_LIST,
+    private void runBuildBom(final Project project) {
+        logger.info(String.format("Configuring %s task for project path: %s", BUILD_TOOL_STEP_CAMEL,
                 project.getPath()));
 
-        final CreateFlatDependencyListTask createFlatDependencyList = project.getTasks()
-                .create(CREATE_FLAT_DEPENDENCY_LIST, CreateFlatDependencyListTask.class);
-        createFlatDependencyList.setDescription("Create a flat list of unique dependencies.");
+        final BuildBOMTask createFlatDependencyList = project.getTasks()
+                .create(BUILD_TOOL_STEP_CAMEL, BuildBOMTask.class);
+        createFlatDependencyList.setDescription(
+                "Can be used to create a flat list of unique dependencies, create the bdio file, deploy the bdio file to the Hub server, "
+                        + "check the project's policies on the Hub, and create a Hub risk report.");
         createFlatDependencyList.setGroup("reporting");
 
-        logger.info(String.format("Successfully configured %s", CREATE_FLAT_DEPENDENCY_LIST));
-    }
-
-    private void createCreateHubOutputTask(final Project project) {
-        logger.info(String.format("Configuring %s task for project path: %s", CREATE_HUB_OUTPUT,
-                project.getPath()));
-
-        final CreateHubOutputTask createHubOutput = project.getTasks().create(CREATE_HUB_OUTPUT,
-                CreateHubOutputTask.class);
-        createHubOutput.setDescription("Create the bdio file.");
-        createHubOutput.setGroup("reporting");
-
-        logger.info(String.format("Successfully configured %s", CREATE_HUB_OUTPUT));
-    }
-
-    private void createDeployHubOutputTask(final Project project) {
-        logger.info(String.format("Configuring %s task for project path: %s", DEPLOY_HUB_OUTPUT,
-                project.getPath()));
-
-        final DeployHubOutputTask deployHubOutput = project.getTasks().create(DEPLOY_HUB_OUTPUT,
-                DeployHubOutputTask.class);
-        deployHubOutput.setDescription("Deploy the bdio file to the Hub server.");
-        deployHubOutput.setGroup("reporting");
-
-        logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT));
-    }
-
-    private void createCheckPoliciesTask(final Project project) {
-        logger.info(String.format("Configuring %s task for project path: %s", CHECK_POLICIES,
-                project.getPath()));
-
-        final CheckPoliciesTask checkPolicies = project.getTasks().create(CHECK_POLICIES, CheckPoliciesTask.class);
-        checkPolicies.setDescription(String.format(
-                "Check the project's policies on the Hub. *Note: This will check ONLY the current policy status, NOT the updated status after a deploy of bdio output. For that, you would use %s.",
-                DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES));
-        checkPolicies.setGroup("reporting");
-
-        logger.info(String.format("Successfully configured %s", CHECK_POLICIES));
-    }
-
-    private void createDeployHubOutputAndCheckPoliciesTask(final Project project) {
-        logger.info(String.format("Configuring %s task for project path: %s", DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES,
-                project.getPath()));
-
-        final DeployHubOutputAndCheckPoliciesTask deployHubOutputAndCheckPolicies = project.getTasks()
-                .create(DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES, DeployHubOutputAndCheckPoliciesTask.class);
-        deployHubOutputAndCheckPolicies.setDescription(
-                "Create, then deploy the bdio file and wait for completion, then check the project's policies on the Hub.");
-        deployHubOutputAndCheckPolicies.setGroup("reporting");
-
-        logger.info(String.format("Successfully configured %s", DEPLOY_HUB_OUTPUT_AND_CHECK_POLICIES));
+        logger.info(String.format("Successfully configured %s", BUILD_TOOL_STEP_CAMEL));
     }
 
 }
