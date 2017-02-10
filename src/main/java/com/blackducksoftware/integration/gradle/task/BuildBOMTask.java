@@ -174,7 +174,7 @@ public class BuildBOMTask extends DefaultTask {
     }
 
     private void waitForHub() throws GradleException {
-        if (!waitedForHub) {
+        if (getDeployHubBdio() && !waitedForHub) {
             try {
                 BUILD_TOOL_HELPER.waitForHub(getHubServicesFactory(), getHubProjectName(), getHubVersionName(), getHubScanTimeout());
                 waitedForHub = true;
