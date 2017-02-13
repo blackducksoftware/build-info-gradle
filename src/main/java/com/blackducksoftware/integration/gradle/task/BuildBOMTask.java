@@ -138,22 +138,30 @@ public class BuildBOMTask extends DefaultTask {
     }
 
     public void performTask() {
-        BUILD_TOOL_HELPER = new BuildToolHelper(new Slf4jIntLogger(logger));
+        try {
+            BUILD_TOOL_HELPER = new BuildToolHelper(new Slf4jIntLogger(logger));
 
-        if (getCreateFlatDependencyList()) {
-            createFlatDependencyList();
-        }
-        if (getCreateHubBdio()) {
-            createHubBDIO();
-        }
-        if (getDeployHubBdio()) {
-            deployHubBDIO();
-        }
-        if (getCreateHubReport()) {
-            createHubReport();
-        }
-        if (getCheckPolicies()) {
-            checkHubPolicies();
+            if (getCreateFlatDependencyList()) {
+                createFlatDependencyList();
+            }
+            if (getCreateHubBdio()) {
+                createHubBDIO();
+            }
+            if (getDeployHubBdio()) {
+                deployHubBDIO();
+            }
+            if (getCreateHubReport()) {
+                createHubReport();
+            }
+            if (getCheckPolicies()) {
+                checkHubPolicies();
+            }
+        } catch (final Exception e) {
+            if (hubIgnoreFailure) {
+                logger.error(e.getMessage(), e);
+            } else {
+                throw e;
+            }
         }
     }
 
