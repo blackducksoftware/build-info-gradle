@@ -300,7 +300,7 @@ public class BuildBOMTask extends DefaultTask {
         if (StringUtils.isNotBlank(hubProjectName)) {
             return hubProjectName;
         } else {
-            return getProject().getName();
+            return getProject().getName() + ":" + getProject().getVersion().toString();
         }
     }
 
