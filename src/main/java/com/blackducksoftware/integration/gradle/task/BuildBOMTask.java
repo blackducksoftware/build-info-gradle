@@ -21,6 +21,7 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle.task;
 
+import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.BOM_WAIT_ERROR;
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.BUILD_TOOL_CONFIGURATION_ERROR;
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES_ERROR;
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.CHECK_POLICIES_FINISHED;
@@ -37,7 +38,6 @@ import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT_FINISHED;
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.DEPLOY_HUB_OUTPUT_STARTING;
 import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.FAILED_TO_CREATE_REPORT;
-import static com.blackducksoftware.integration.hub.buildtool.BuildToolConstants.SCAN_ERROR_MESSAGE;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,17 +50,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.gradle.DependencyGatherer;
-import com.blackducksoftware.integration.hub.api.policy.PolicyStatusEnum;
-import com.blackducksoftware.integration.hub.api.policy.PolicyStatusItem;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.buildtool.BuildToolHelper;
 import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
 import com.blackducksoftware.integration.hub.buildtool.FlatDependencyListWriter;
 import com.blackducksoftware.integration.hub.buildtool.bdio.BdioDependencyWriter;
 import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDescription;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.model.enumeration.VersionBomPolicyStatusOverallStatusEnum;
+import com.blackducksoftware.integration.hub.model.view.VersionBomPolicyStatusView;
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
@@ -165,12 +165,25 @@ public class BuildBOMTask extends DefaultTask {
         }
     }
 
+    private RestConnection getRestConnection(final HubServerConfig hubServerConfig) throws EncryptionException {
+        final Slf4jIntLogger intLogger = new Slf4jIntLogger(logger);
+        final RestConnection restConnection = new CredentialsRestConnection(intLogger, hubServerConfig.getHubUrl(),
+                hubServerConfig.getGlobalCredentials().getUsername(), hubServerConfig.getGlobalCredentials().getDecryptedPassword(),
+                hubServerConfig.getTimeout());
+        restConnection.proxyHost = hubServerConfig.getProxyInfo().getHost();
+        restConnection.proxyPort = hubServerConfig.getProxyInfo().getPort();
+        restConnection.proxyNoHosts = hubServerConfig.getProxyInfo().getIgnoredProxyHosts();
+        restConnection.proxyUsername = hubServerConfig.getProxyInfo().getUsername();
+        restConnection.proxyPassword = hubServerConfig.getProxyInfo().getDecryptedPassword();
+        return restConnection;
+    }
+
     private HubServicesFactory getHubServicesFactory() throws GradleException {
         if (services == null) {
             final RestConnection restConnection;
             try {
                 final HubServerConfig hubServerConfig = getHubServerConfigBuilder().build();
-                restConnection = new CredentialsRestConnection(hubServerConfig);
+                restConnection = getRestConnection(hubServerConfig);
             } catch (final IllegalArgumentException e) {
                 throw new GradleException(String.format(BUILD_TOOL_CONFIGURATION_ERROR, e.getMessage()), e);
             } catch (final EncryptionException e) {
@@ -186,8 +199,8 @@ public class BuildBOMTask extends DefaultTask {
             try {
                 BUILD_TOOL_HELPER.waitForHub(getHubServicesFactory(), getHubProjectName(), getHubVersionName(), getHubScanTimeout());
                 waitedForHub = true;
-            } catch (final HubIntegrationException e) {
-                throw new GradleException(String.format(SCAN_ERROR_MESSAGE, e.getMessage()), e);
+            } catch (final IntegrationException e) {
+                throw new GradleException(String.format(BOM_WAIT_ERROR, e.getMessage()), e);
             }
         }
     }
@@ -232,7 +245,7 @@ public class BuildBOMTask extends DefaultTask {
         try {
             BUILD_TOOL_HELPER.deployHubOutput(getHubServicesFactory(), getOutputDirectory(),
                     getProject().getName());
-        } catch (HubIntegrationException | IllegalArgumentException e) {
+        } catch (IntegrationException | IllegalArgumentException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
         logger.info(String.format(DEPLOY_HUB_OUTPUT_FINISHED, getBdioFilename()));
@@ -244,7 +257,7 @@ public class BuildBOMTask extends DefaultTask {
         final File reportOutput = new File(getOutputDirectory(), "report");
         try {
             BUILD_TOOL_HELPER.createRiskReport(getHubServicesFactory(), reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
-        } catch (final HubIntegrationException e) {
+        } catch (final IntegrationException e) {
             throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
         }
         logger.info(String.format(CREATE_REPORT_FINISHED, getBdioFilename()));
@@ -254,21 +267,21 @@ public class BuildBOMTask extends DefaultTask {
         logger.info(String.format(CHECK_POLICIES_STARTING, getBdioFilename()));
         waitForHub();
         try {
-            final PolicyStatusItem policyStatusItem = BUILD_TOOL_HELPER.checkPolicies(getHubServicesFactory(), getHubProjectName(),
+            final VersionBomPolicyStatusView policyStatusItem = BUILD_TOOL_HELPER.checkPolicies(getHubServicesFactory(), getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
-        } catch (IllegalArgumentException | HubIntegrationException e) {
+        } catch (IllegalArgumentException | IntegrationException e) {
             throw new GradleException(String.format(CHECK_POLICIES_ERROR, e.getMessage()), e);
         }
 
         logger.info(String.format(CHECK_POLICIES_FINISHED, getBdioFilename()));
     }
 
-    public void handlePolicyStatusItem(final PolicyStatusItem policyStatusItem) {
+    public void handlePolicyStatusItem(final VersionBomPolicyStatusView policyStatusItem) {
         final PolicyStatusDescription policyStatusDescription = new PolicyStatusDescription(policyStatusItem);
         final String policyStatusMessage = policyStatusDescription.getPolicyStatusMessage();
         logger.info(policyStatusMessage);
-        if (PolicyStatusEnum.IN_VIOLATION == policyStatusItem.getOverallStatus()) {
+        if (VersionBomPolicyStatusOverallStatusEnum.IN_VIOLATION == policyStatusItem.getOverallStatus()) {
             throw new GradleException(policyStatusMessage);
         }
     }
