@@ -5,6 +5,7 @@ This plugin provides ability to generate a [Black Duck I/O](https://github.com/b
 ## Build ##
 [![Build Status](https://travis-ci.org/blackducksoftware/hub-gradle-plugin.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-gradle-plugin)
 [![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-gradle-plugin/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-gradle-plugin?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Where can I get the latest release? ##
 You can download the latest release from Maven Central.
@@ -12,6 +13,3 @@ You can download the latest release from Maven Central.
 ## Documentation 
 
 All documentation for hub-gradle-plugin located on the wiki: https://github.com/blackducksoftware/hub-gradle-plugin/wiki
-
-## License ##
-Apache License 2.0 
