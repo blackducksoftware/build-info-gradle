@@ -31,7 +31,7 @@ description='Black Duck Hub Gradle Plugin'
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
-	compile 'com.blackducksoftware.integration:hub-common:8.2.1'
+	compile 'com.blackducksoftware.integration:hub-common:8.4.0-SNAPSHOT'
 
 	testCompile 'junit:junit:4.12'
 }

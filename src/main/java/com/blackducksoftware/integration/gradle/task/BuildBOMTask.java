@@ -68,9 +68,11 @@ import com.blackducksoftware.integration.log.Slf4jIntLogger;
 public class BuildBOMTask extends DefaultTask {
     public final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private BuildToolHelper BUILD_TOOL_HELPER;
+    private BuildToolHelper buildToolHelper;
 
     private boolean hubIgnoreFailure = false;
+
+    private String hubCodeLocationName;
 
     private String hubProjectName;
 
@@ -138,7 +140,7 @@ public class BuildBOMTask extends DefaultTask {
 
     public void performTask() {
         try {
-            BUILD_TOOL_HELPER = new BuildToolHelper(new Slf4jIntLogger(logger));
+            buildToolHelper = new BuildToolHelper(new Slf4jIntLogger(logger));
 
             if (getCreateFlatDependencyList()) {
                 createFlatDependencyList();
@@ -188,7 +190,7 @@ public class BuildBOMTask extends DefaultTask {
     private void waitForHub() throws GradleException {
         if (getDeployHubBdio() && !waitedForHub) {
             try {
-                BUILD_TOOL_HELPER.waitForHub(getHubServicesFactory(), getHubProjectName(), getHubVersionName(), getHubScanTimeout());
+                buildToolHelper.waitForHub(getHubServicesFactory(), getHubProjectName(), getHubVersionName(), getHubScanTimeout());
                 waitedForHub = true;
             } catch (final IntegrationException e) {
                 throw new GradleException(String.format(BOM_WAIT_ERROR, e.getMessage()), e);
@@ -204,7 +206,7 @@ public class BuildBOMTask extends DefaultTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            BUILD_TOOL_HELPER.createFlatOutput(rootNode,
+            buildToolHelper.createFlatOutput(rootNode,
                     getHubProjectName(), getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
@@ -221,7 +223,7 @@ public class BuildBOMTask extends DefaultTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            BUILD_TOOL_HELPER.createHubOutput(rootNode, getProject().getName(), getHubProjectName(),
+            buildToolHelper.createHubOutput(rootNode, getProject().getName(), getHubCodeLocationName(), getHubProjectName(),
                     getHubVersionName(), getOutputDirectory());
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
@@ -234,7 +236,7 @@ public class BuildBOMTask extends DefaultTask {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
 
         try {
-            BUILD_TOOL_HELPER.deployHubOutput(getHubServicesFactory(), getOutputDirectory(),
+            buildToolHelper.deployHubOutput(getHubServicesFactory(), getOutputDirectory(),
                     getProject().getName());
         } catch (IntegrationException | IllegalArgumentException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
@@ -247,7 +249,7 @@ public class BuildBOMTask extends DefaultTask {
         waitForHub();
         final File reportOutput = new File(getOutputDirectory(), "report");
         try {
-            BUILD_TOOL_HELPER.createRiskReport(getHubServicesFactory(), reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
+            buildToolHelper.createRiskReport(getHubServicesFactory(), reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
         } catch (final IntegrationException e) {
             throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
         }
@@ -258,7 +260,7 @@ public class BuildBOMTask extends DefaultTask {
         logger.info(String.format(CHECK_POLICIES_STARTING, getBdioFilename()));
         waitForHub();
         try {
-            final VersionBomPolicyStatusView policyStatusItem = BUILD_TOOL_HELPER.checkPolicies(getHubServicesFactory(), getHubProjectName(),
+            final VersionBomPolicyStatusView policyStatusItem = buildToolHelper.checkPolicies(getHubServicesFactory(), getHubProjectName(),
                     getHubVersionName());
             handlePolicyStatusItem(policyStatusItem);
         } catch (IllegalArgumentException | IntegrationException e) {
@@ -298,6 +300,10 @@ public class BuildBOMTask extends DefaultTask {
         hubServerConfigBuilder.setProxyPassword(hubProxyPassword);
 
         return hubServerConfigBuilder;
+    }
+
+    public String getHubCodeLocationName() {
+        return hubCodeLocationName;
     }
 
     public String getHubProjectName() {
@@ -410,6 +416,10 @@ public class BuildBOMTask extends DefaultTask {
 
     public void setOutputDirectory(final File outputDirectory) {
         this.outputDirectory = outputDirectory;
+    }
+
+    public void setHubCodeLocationName(final String hubCodeLocationName) {
+        this.hubCodeLocationName = hubCodeLocationName;
     }
 
     public void setHubProjectName(final String hubProjectName) {
