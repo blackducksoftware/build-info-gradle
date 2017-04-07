@@ -28,7 +28,7 @@ import org.gradle.api.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.gradle.task.BuildBOMTask;
+import com.blackducksoftware.integration.gradle.task.BuildBomTask;
 
 public class HubGradlePlugin implements Plugin<Project> {
     private final Logger logger = LoggerFactory.getLogger(HubGradlePlugin.class);
@@ -40,16 +40,16 @@ public class HubGradlePlugin implements Plugin<Project> {
         }
 
         if (project.getTasks().findByName(BUILD_TOOL_STEP_CAMEL) == null) {
-            runBuildBom(project);
+            configureBuildBomTask(project);
         }
     }
 
-    private void runBuildBom(final Project project) {
+    private void configureBuildBomTask(final Project project) {
         logger.info(String.format("Configuring %s task for project path: %s", BUILD_TOOL_STEP_CAMEL,
                 project.getPath()));
 
-        final BuildBOMTask createFlatDependencyList = project.getTasks()
-                .create(BUILD_TOOL_STEP_CAMEL, BuildBOMTask.class);
+        final BuildBomTask createFlatDependencyList = project.getTasks()
+                .create(BUILD_TOOL_STEP_CAMEL, BuildBomTask.class);
         createFlatDependencyList.setDescription(
                 "Can be used to create a flat list of unique dependencies, create the bdio file, deploy the bdio file to the Hub server, "
                         + "check the project's policies on the Hub, and create a Hub risk report.");

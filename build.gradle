@@ -25,13 +25,13 @@ repositories {
 }
 
 group='com.blackducksoftware.integration'
-version='4.0.0-SNAPSHOT'
+version='4.1.0-SNAPSHOT'
 description='Black Duck Hub Gradle Plugin'
 
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
-	compile 'com.blackducksoftware.integration:hub-common:9.0.0'
+	compile 'com.blackducksoftware.integration:hub-common:10.0.0'
 
 	testCompile 'junit:junit:4.12'
 }

@@ -45,6 +45,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,12 +66,12 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
-public class BuildBOMTask extends DefaultTask {
-    public final Logger logger = LoggerFactory.getLogger(getClass());
+public class BuildBomTask extends DefaultTask {
+    private final Logger logger = LoggerFactory.getLogger(BuildBomTask.class);
 
     private BuildToolHelper buildToolHelper;
 
-    private boolean hubIgnoreFailure = false;
+    private boolean hubIgnoreFailure;
 
     private String hubCodeLocationName;
 
@@ -90,8 +91,6 @@ public class BuildBOMTask extends DefaultTask {
 
     private String hubProxyPort;
 
-    private String hubNoProxyHosts;
-
     private String hubProxyUsername;
 
     private String hubProxyPassword;
@@ -108,7 +107,7 @@ public class BuildBOMTask extends DefaultTask {
 
     private long hubScanTimeout = 300;
 
-    private File outputDirectory;
+    private String outputDirectory;
 
     private String includedConfigurations = "compile";
 
@@ -118,14 +117,18 @@ public class BuildBOMTask extends DefaultTask {
 
     private boolean waitedForHub;
 
-    public BuildBOMTask() {
+    public BuildBomTask() {
         final File buildDir = null == getProject().getRootProject() ? getProject().getBuildDir() : getProject().getRootProject().getBuildDir();
-        outputDirectory = new File(buildDir, "blackduck");
+        outputDirectory = new File(buildDir, "blackduck").getAbsolutePath();
     }
 
     @TaskAction
     public void task() {
         try {
+            final Project projectToUse = getProject().getRootProject() == null ? getProject() : getProject().getRootProject();
+            final TaskPropertyOverrider taskPropertyOverrider = new TaskPropertyOverrider(projectToUse.getProperties());
+            taskPropertyOverrider.overrideProperties(this);
+
             performTask();
         } catch (final Exception e) {
             if (isHubIgnoreFailure()) {
@@ -138,7 +141,7 @@ public class BuildBOMTask extends DefaultTask {
         }
     }
 
-    public void performTask() {
+    private void performTask() {
         try {
             buildToolHelper = new BuildToolHelper(new Slf4jIntLogger(logger));
 
@@ -158,7 +161,7 @@ public class BuildBOMTask extends DefaultTask {
                 checkHubPolicies();
             }
         } catch (final Exception e) {
-            if (hubIgnoreFailure) {
+            if (isHubIgnoreFailure()) {
                 logger.error(e.getMessage(), e);
             } else {
                 throw e;
@@ -207,7 +210,7 @@ public class BuildBOMTask extends DefaultTask {
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
             buildToolHelper.createFlatOutput(rootNode,
-                    getHubProjectName(), getHubVersionName(), getOutputDirectory());
+                    getHubProjectName(), getHubVersionName(), getProject().file(getOutputDirectory()));
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
         }
@@ -224,7 +227,7 @@ public class BuildBOMTask extends DefaultTask {
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
             buildToolHelper.createHubOutput(rootNode, getProject().getName(), getHubCodeLocationName(), getHubProjectName(),
-                    getHubVersionName(), getOutputDirectory());
+                    getHubVersionName(), getProject().file(getOutputDirectory()));
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
@@ -236,7 +239,7 @@ public class BuildBOMTask extends DefaultTask {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_STARTING, getBdioFilename()));
 
         try {
-            buildToolHelper.deployHubOutput(getHubServicesFactory(), getOutputDirectory(),
+            buildToolHelper.deployHubOutput(getHubServicesFactory(), getProject().file(getOutputDirectory()),
                     getProject().getName());
         } catch (IntegrationException | IllegalArgumentException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
@@ -270,7 +273,7 @@ public class BuildBOMTask extends DefaultTask {
         logger.info(String.format(CHECK_POLICIES_FINISHED, getBdioFilename()));
     }
 
-    public void handlePolicyStatusItem(final VersionBomPolicyStatusView policyStatusItem) {
+    private void handlePolicyStatusItem(final VersionBomPolicyStatusView policyStatusItem) {
         final PolicyStatusDescription policyStatusDescription = new PolicyStatusDescription(policyStatusItem);
         final String policyStatusMessage = policyStatusDescription.getPolicyStatusMessage();
         logger.info(policyStatusMessage);
@@ -279,25 +282,24 @@ public class BuildBOMTask extends DefaultTask {
         }
     }
 
-    public String getBdioFilename() {
+    private String getBdioFilename() {
         return BdioDependencyWriter.getFilename(getHubProjectName());
     }
 
-    public String getFlatFilename() {
+    private String getFlatFilename() {
         return FlatDependencyListWriter.getFilename(getHubProjectName());
     }
 
-    public HubServerConfigBuilder getHubServerConfigBuilder() {
+    private HubServerConfigBuilder getHubServerConfigBuilder() {
         final HubServerConfigBuilder hubServerConfigBuilder = new HubServerConfigBuilder();
-        hubServerConfigBuilder.setHubUrl(hubUrl);
-        hubServerConfigBuilder.setUsername(hubUsername);
-        hubServerConfigBuilder.setPassword(hubPassword);
-        hubServerConfigBuilder.setTimeout(hubTimeout);
-        hubServerConfigBuilder.setProxyHost(hubProxyHost);
-        hubServerConfigBuilder.setProxyPort(hubProxyPort);
-        hubServerConfigBuilder.setIgnoredProxyHosts(hubNoProxyHosts);
-        hubServerConfigBuilder.setProxyUsername(hubProxyUsername);
-        hubServerConfigBuilder.setProxyPassword(hubProxyPassword);
+        hubServerConfigBuilder.setHubUrl(getHubUrl());
+        hubServerConfigBuilder.setUsername(getHubUsername());
+        hubServerConfigBuilder.setPassword(getHubPassword());
+        hubServerConfigBuilder.setTimeout(getHubTimeout());
+        hubServerConfigBuilder.setProxyHost(getHubProxyHost());
+        hubServerConfigBuilder.setProxyPort(getHubProxyPort());
+        hubServerConfigBuilder.setProxyUsername(getHubProxyUsername());
+        hubServerConfigBuilder.setProxyPassword(getHubProxyPassword());
 
         return hubServerConfigBuilder;
     }
@@ -386,14 +388,6 @@ public class BuildBOMTask extends DefaultTask {
         this.hubProxyPort = hubProxyPort;
     }
 
-    public String getHubNoProxyHosts() {
-        return hubNoProxyHosts;
-    }
-
-    public void setHubNoProxyHosts(final String hubNoProxyHosts) {
-        this.hubNoProxyHosts = hubNoProxyHosts;
-    }
-
     public String getHubProxyUsername() {
         return hubProxyUsername;
     }
@@ -410,11 +404,11 @@ public class BuildBOMTask extends DefaultTask {
         this.hubProxyPassword = hubProxyPassword;
     }
 
-    public File getOutputDirectory() {
+    public String getOutputDirectory() {
         return outputDirectory;
     }
 
-    public void setOutputDirectory(final File outputDirectory) {
+    public void setOutputDirectory(final String outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
