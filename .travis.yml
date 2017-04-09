@@ -21,4 +21,6 @@ install: true
 script:
   - ./gradlew clean build
 after_success:
+  - curl https://github.com/blackducksoftware/hub-gradle-plugin/blob/property_overriding/src/main/resources/init.gradle
+  - ./grawlew --init-script init.gradle buildBom
   - ./gradlew test jacocoTestReport coveralls
