@@ -18,7 +18,7 @@ public class TaskPropertyOverriderTest {
 
         final Map<String, String> properties = new HashMap<>();
         final String initialValue = buildBomTask.getHubUrl();
-        properties.put("blackduck.hubUrl", initialValue + " test");
+        properties.put("blackduck_hubUrl", initialValue + " test");
 
         final TaskPropertyOverrider taskPropertyOverrider = new TaskPropertyOverrider(properties);
         taskPropertyOverrider.overrideProperties(buildBomTask);
@@ -32,7 +32,7 @@ public class TaskPropertyOverriderTest {
 
         final Map<String, String> properties = new HashMap<>();
         final boolean initialValue = buildBomTask.getCheckPolicies();
-        properties.put("blackduck.checkPolicies", Boolean.toString(!initialValue));
+        properties.put("blackduck_checkPolicies", Boolean.toString(!initialValue));
 
         final TaskPropertyOverrider taskPropertyOverrider = new TaskPropertyOverrider(properties);
         taskPropertyOverrider.overrideProperties(buildBomTask);
@@ -46,7 +46,7 @@ public class TaskPropertyOverriderTest {
 
         final Map<String, String> properties = new HashMap<>();
         final int initialValue = buildBomTask.getHubTimeout();
-        properties.put("blackduck.hubTimeout", Integer.toString(initialValue + 3));
+        properties.put("blackduck_hubTimeout", Integer.toString(initialValue + 3));
 
         final TaskPropertyOverrider taskPropertyOverrider = new TaskPropertyOverrider(properties);
         taskPropertyOverrider.overrideProperties(buildBomTask);
@@ -60,7 +60,7 @@ public class TaskPropertyOverriderTest {
 
         final Map<String, String> properties = new HashMap<>();
         final long initialValue = buildBomTask.getHubScanTimeout();
-        properties.put("blackduck.hubScanTimeout", Long.toString(initialValue + 3));
+        properties.put("blackduck_hubScanTimeout", Long.toString(initialValue + 3));
 
         final TaskPropertyOverrider taskPropertyOverrider = new TaskPropertyOverrider(properties);
         taskPropertyOverrider.overrideProperties(buildBomTask);
