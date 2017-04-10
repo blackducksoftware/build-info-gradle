@@ -30,7 +30,7 @@ import org.gradle.api.Task;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.gradle.task.BuildBOMTask;
+import com.blackducksoftware.integration.gradle.task.BuildBomTask;
 import com.blackducksoftware.integration.hub.buildtool.BuildToolConstants;
 
 public class HubGradlePluginTest {
@@ -45,6 +45,6 @@ public class HubGradlePluginTest {
 
         final Task task = project.getTasks().getByName(BuildToolConstants.BUILD_TOOL_STEP_CAMEL);
         assertNotNull(task);
-        assertTrue(task instanceof BuildBOMTask);
+        assertTrue(task instanceof BuildBomTask);
     }
 }
