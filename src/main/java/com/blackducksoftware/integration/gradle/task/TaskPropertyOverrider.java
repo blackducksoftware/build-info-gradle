@@ -43,7 +43,7 @@ public class TaskPropertyOverrider {
     }
 
     private void applyProperties(final Map<String, Object> properties, final Map<? extends Object, ? extends Object> propertiesToAdd) {
-        final String prefix = "blackduck.";
+        final String prefix = "blackduck_";
         for (final Map.Entry<? extends Object, ? extends Object> entry : propertiesToAdd.entrySet()) {
             if (entry.getKey() != null && entry.getKey() instanceof String && ((String) entry.getKey()).startsWith(prefix)) {
                 properties.put(((String) entry.getKey()).substring(prefix.length()), entry.getValue());

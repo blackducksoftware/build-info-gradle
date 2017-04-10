@@ -1,6 +1,6 @@
 initscript {
     repositories { mavenCentral() }
-    dependencies { classpath 'com.blackducksoftware.integration:hub-gradle-plugin:4.1.0' }
+    dependencies { classpath 'com.blackducksoftware.integration:hub-gradle-plugin:+' }
 }
 
 rootProject {

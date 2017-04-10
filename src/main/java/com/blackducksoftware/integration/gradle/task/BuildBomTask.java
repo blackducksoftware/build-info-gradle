@@ -115,8 +115,6 @@ public class BuildBomTask extends DefaultTask {
 
     private HubServicesFactory services;
 
-    private boolean waitedForHub;
-
     public BuildBomTask() {
         final File buildDir = null == getProject().getRootProject() ? getProject().getBuildDir() : getProject().getRootProject().getBuildDir();
         outputDirectory = new File(buildDir, "blackduck").getAbsolutePath();
@@ -154,11 +152,12 @@ public class BuildBomTask extends DefaultTask {
             if (getDeployHubBdio()) {
                 deployHubBDIO();
             }
+            boolean alreadyWaited = false;
             if (getCreateHubReport()) {
-                createHubReport();
+                alreadyWaited = createHubReport(alreadyWaited);
             }
             if (getCheckPolicies()) {
-                checkHubPolicies();
+                alreadyWaited = checkHubPolicies(alreadyWaited);
             }
         } catch (final Exception e) {
             if (isHubIgnoreFailure()) {
@@ -190,15 +189,16 @@ public class BuildBomTask extends DefaultTask {
         return services;
     }
 
-    private void waitForHub() throws GradleException {
-        if (getDeployHubBdio() && !waitedForHub) {
+    private boolean waitForHub(boolean alreadyWaited) throws GradleException {
+        if (getDeployHubBdio() && !alreadyWaited) {
             try {
                 buildToolHelper.waitForHub(getHubServicesFactory(), getHubProjectName(), getHubVersionName(), getHubScanTimeout());
-                waitedForHub = true;
+                alreadyWaited = true;
             } catch (final IntegrationException e) {
                 throw new GradleException(String.format(BOM_WAIT_ERROR, e.getMessage()), e);
             }
         }
+        return alreadyWaited;
     }
 
     private void createFlatDependencyList() throws GradleException {
@@ -247,9 +247,9 @@ public class BuildBomTask extends DefaultTask {
         logger.info(String.format(DEPLOY_HUB_OUTPUT_FINISHED, getBdioFilename()));
     }
 
-    private void createHubReport() throws GradleException {
+    private boolean createHubReport(boolean alreadyWaited) throws GradleException {
         logger.info(String.format(CREATE_REPORT_STARTING, getBdioFilename()));
-        waitForHub();
+        alreadyWaited = waitForHub(alreadyWaited);
         final File reportOutput = new File(getOutputDirectory(), "report");
         try {
             buildToolHelper.createRiskReport(getHubServicesFactory(), reportOutput, getHubProjectName(), getHubVersionName(), getHubScanTimeout());
@@ -257,11 +257,12 @@ public class BuildBomTask extends DefaultTask {
             throw new GradleException(String.format(FAILED_TO_CREATE_REPORT, e.getMessage()), e);
         }
         logger.info(String.format(CREATE_REPORT_FINISHED, getBdioFilename()));
+        return alreadyWaited;
     }
 
-    private void checkHubPolicies() throws GradleException {
+    private boolean checkHubPolicies(boolean alreadyWaited) throws GradleException {
         logger.info(String.format(CHECK_POLICIES_STARTING, getBdioFilename()));
-        waitForHub();
+        alreadyWaited = waitForHub(alreadyWaited);
         try {
             final VersionBomPolicyStatusView policyStatusItem = buildToolHelper.checkPolicies(getHubServicesFactory(), getHubProjectName(),
                     getHubVersionName());
@@ -271,6 +272,7 @@ public class BuildBomTask extends DefaultTask {
         }
 
         logger.info(String.format(CHECK_POLICIES_FINISHED, getBdioFilename()));
+        return alreadyWaited;
     }
 
     private void handlePolicyStatusItem(final VersionBomPolicyStatusView policyStatusItem) {

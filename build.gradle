@@ -20,12 +20,11 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url 'http://jcenter.bintray.com' }
     maven { url 'https://updates.suite.blackducksoftware.com/integrations' }
 }
 
 group='com.blackducksoftware.integration'
-version='4.1.0-SNAPSHOT'
+version='5.0.0-SNAPSHOT'
 description='Black Duck Hub Gradle Plugin'
 
 dependencies {
