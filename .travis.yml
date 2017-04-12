@@ -1,25 +1,9 @@
 language: java
-before_cache:
-  # removing the lock file seems to be necessary so that travis
-  # won't create a new cache every build
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-    - $HOME/.m2
-
-notifications:
-  email:
-    recipients:
-      - akamen@blackducksoftware.com
-      - jrichard@blackducksoftware.com
-      - psantos@blackducksoftware.com
-      - ekerwin@blackducksoftware.com
-
 install: true
+
 script:
   - ./gradlew clean build
+  
 after_success:
    - curl https://raw.githubusercontent.com/blackducksoftware/hub-gradle-plugin/master/src/main/resources/init.gradle -o init.gradle'
   - ./gradlew --init-script init.gradle buildBom -PdeployHubBdio=false
