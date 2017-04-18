@@ -13,4 +13,4 @@ You can download the latest release from Maven Central.
 
 ## Documentation 
 
-All documentation for hub-gradle-plugin located on the wiki: https://github.com/blackducksoftware/hub-gradle-plugin/wiki
+All documentation for hub-gradle-plugin located on our public [Black Duck Confluence](https://blackducksoftware.atlassian.net/wiki/display/INTDOCS/)
