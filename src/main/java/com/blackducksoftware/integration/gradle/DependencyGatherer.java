@@ -21,10 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.gradle;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,8 +35,8 @@ import org.gradle.api.artifacts.ResolvedDependency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
-import com.blackducksoftware.integration.hub.buildtool.Gav;
+import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode;
+import com.blackducksoftware.integration.hub.bdio.simple.model.externalid.MavenExternalId;
 
 public class DependencyGatherer {
     private final Logger logger = LoggerFactory.getLogger(DependencyGatherer.class);
@@ -65,10 +64,10 @@ public class DependencyGatherer {
         final String groupId = project.getGroup().toString();
         final String artifactId = project.getName();
         final String version = hubProjectVersion;
-        final Gav projectGav = new Gav(groupId, artifactId, version);
+        final MavenExternalId projectGav = new MavenExternalId(groupId, artifactId, version);
 
-        final List<DependencyNode> children = new ArrayList<>();
-        final DependencyNode root = new DependencyNode(projectGav, children);
+        final Set<DependencyNode> children = new LinkedHashSet<>();
+        final DependencyNode root = new DependencyNode(hubProjectName, hubProjectVersion, projectGav, children);
         for (final Project childProject : project.getAllprojects()) {
             if (!excludedModules.contains(childProject.getName())) {
                 getProjectDependencies(childProject, children);
@@ -78,7 +77,7 @@ public class DependencyGatherer {
         return root;
     }
 
-    private void getProjectDependencies(final Project project, final List<DependencyNode> children) {
+    private void getProjectDependencies(final Project project, final Set<DependencyNode> children) {
         final ScopesHelper scopesHelper = new ScopesHelper(project, includedConfigurations);
         final Set<Configuration> configurations = project.getConfigurations();
         for (final Configuration configuration : configurations) {
@@ -97,7 +96,7 @@ public class DependencyGatherer {
 
     private DependencyNode createCommonDependencyNode(final ResolvedDependency resolvedDependency, final int level,
             final String configuration) {
-        final Gav gav = createGavFromDependencyNode(resolvedDependency);
+        final MavenExternalId gav = createGavFromDependencyNode(resolvedDependency);
         final String gavKey = gav.toString();
 
         final StringBuffer sb = new StringBuffer();
@@ -120,7 +119,7 @@ public class DependencyGatherer {
             if (logger.isDebugEnabled()) {
                 logger.debug(buffer + gavKey + " (created) config: " + configuration);
             }
-            final List<DependencyNode> children = new ArrayList<>();
+            final Set<DependencyNode> children = new LinkedHashSet<>();
             final DependencyNode dependencyNode = new DependencyNode(gav, children);
             for (final ResolvedDependency child : resolvedDependency.getChildren()) {
                 if (child.getConfiguration().equals(configuration)) {
@@ -132,12 +131,12 @@ public class DependencyGatherer {
         }
     }
 
-    private Gav createGavFromDependencyNode(final ResolvedDependency resolvedDependency) {
+    private MavenExternalId createGavFromDependencyNode(final ResolvedDependency resolvedDependency) {
         final String groupId = resolvedDependency.getModuleGroup();
         final String artifactId = resolvedDependency.getModuleName();
         final String version = resolvedDependency.getModuleVersion();
 
-        final Gav gav = new Gav(groupId, artifactId, version);
+        final MavenExternalId gav = new MavenExternalId(groupId, artifactId, version);
         return gav;
     }
 

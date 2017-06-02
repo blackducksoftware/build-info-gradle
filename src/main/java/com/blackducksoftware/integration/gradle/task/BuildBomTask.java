@@ -53,9 +53,9 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.gradle.DependencyGatherer;
+import com.blackducksoftware.integration.hub.bdio.simple.model.DependencyNode;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.buildtool.BuildToolHelper;
-import com.blackducksoftware.integration.hub.buildtool.DependencyNode;
 import com.blackducksoftware.integration.hub.buildtool.FlatDependencyListWriter;
 import com.blackducksoftware.integration.hub.buildtool.bdio.BdioDependencyWriter;
 import com.blackducksoftware.integration.hub.dataservice.policystatus.PolicyStatusDescription;
@@ -209,8 +209,7 @@ public class BuildBomTask extends DefaultTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            buildToolHelper.createFlatOutput(rootNode,
-                    getHubProjectName(), getHubVersionName(), getProject().file(getOutputDirectory()));
+            buildToolHelper.createFlatOutput(rootNode, getProject().file(getOutputDirectory()));
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_FLAT_DEPENDENCY_LIST_ERROR, e.getMessage()), e);
         }
@@ -226,8 +225,7 @@ public class BuildBomTask extends DefaultTask {
                     getExcludedModules());
             final DependencyNode rootNode = dependencyGatherer.getFullyPopulatedRootNode(getProject(), getHubProjectName(), getHubVersionName());
 
-            buildToolHelper.createHubOutput(rootNode, getProject().getName(), getHubCodeLocationName(), getHubProjectName(),
-                    getHubVersionName(), getProject().file(getOutputDirectory()));
+            buildToolHelper.createHubOutput(rootNode, getHubCodeLocationName(), getProject().file(getOutputDirectory()));
         } catch (final IOException e) {
             throw new GradleException(String.format(CREATE_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
@@ -279,7 +277,7 @@ public class BuildBomTask extends DefaultTask {
         final PolicyStatusDescription policyStatusDescription = new PolicyStatusDescription(policyStatusItem);
         final String policyStatusMessage = policyStatusDescription.getPolicyStatusMessage();
         logger.info(policyStatusMessage);
-        if (VersionBomPolicyStatusOverallStatusEnum.IN_VIOLATION == policyStatusItem.getOverallStatus()) {
+        if (VersionBomPolicyStatusOverallStatusEnum.IN_VIOLATION == policyStatusItem.overallStatus) {
             throw new GradleException(policyStatusMessage);
         }
     }
