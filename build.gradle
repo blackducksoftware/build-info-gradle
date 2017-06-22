@@ -27,11 +27,20 @@ group='com.blackducksoftware.integration'
 version='5.1.0-SNAPSHOT'
 description='Black Duck Hub Gradle Plugin'
 
+configurations {
+    // IMPORTANT DO NOT REMOVE!!!!
+    // need this in there because hub-common depends on groovy and so does the gradle API.
+    // this prevents a build failure of the plugin because of the conflicting dependencies.
+    // Started in hub-common 13.0.0
+    // Article on this fix: 
+    // https://discuss.gradle.org/t/conflicting-module-versions-with-groovy-all/16935
+    all*.exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+}
+
 dependencies {
 	compile gradleApi()
-	compile localGroovy()
-	compile 'com.blackducksoftware.integration:hub-common:12.0.1'
-
+	compile 'com.blackducksoftware.integration:hub-common:13.0.2'
+    
 	testCompile 'junit:junit:4.12'
 }
 
