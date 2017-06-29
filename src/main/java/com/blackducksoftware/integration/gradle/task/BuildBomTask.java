@@ -238,7 +238,7 @@ public class BuildBomTask extends DefaultTask {
 
         try {
             buildToolHelper.deployHubOutput(getHubServicesFactory(), getProject().file(getOutputDirectory()),
-                    getProject().getName());
+                    getHubProjectName());
         } catch (IntegrationException | IllegalArgumentException e) {
             throw new GradleException(String.format(DEPLOY_HUB_OUTPUT_ERROR, e.getMessage()), e);
         }
