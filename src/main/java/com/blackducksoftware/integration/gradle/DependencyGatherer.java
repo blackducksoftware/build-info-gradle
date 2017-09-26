@@ -121,12 +121,12 @@ public class DependencyGatherer {
             }
             final Set<DependencyNode> children = new LinkedHashSet<>();
             final DependencyNode dependencyNode = new DependencyNode(gav, children);
+            visitedMap.put(gavKey, dependencyNode);
             for (final ResolvedDependency child : resolvedDependency.getChildren()) {
                 if (child.getConfiguration().equals(configuration)) {
                     children.add(createCommonDependencyNode(child, level + 1, configuration));
                 }
             }
-            visitedMap.put(gavKey, dependencyNode);
             return dependencyNode;
         }
     }
