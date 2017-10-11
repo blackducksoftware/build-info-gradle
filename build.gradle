@@ -40,6 +40,11 @@ configurations {
 dependencies {
 	compile gradleApi()
 	compile 'com.blackducksoftware.integration:hub-common:13.0.2'
+
+    // we do not have a direct dependency on integration-bdio but this is the minimal change to solve
+    // failures related to cyclic dependencies, remove this once hub-common is upgraded to a version
+    // that uses inegration-bdio >= 4.2.1
+    compile 'com.blackducksoftware.integration:integration-bdio:4.2.1'
     
 	testCompile 'junit:junit:4.12'
 }
